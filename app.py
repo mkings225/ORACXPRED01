@@ -64,7 +64,7 @@ def extract_score(event: Dict[str, Any]) -> Tuple[Optional[int], Optional[int], 
 def ai_predict(
     odds_1: Optional[float],
     odds_x: Optional[float],
-    odds_2: Optional<float],
+    odds_2: Optional[float],
 ) -> Dict[str, Any]:
     """
     Pseudo-IA : transforme les cotes en probabilités implicites
