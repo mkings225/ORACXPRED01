@@ -197,8 +197,97 @@ def index() -> str:
 
 @app.route("/api/matches")
 def api_matches():
-    # Endpoint JSON utilisé par l’interface dynamique (AJAX)
+    # Endpoint JSON utilisé par l'interface dynamique (AJAX)
     return jsonify(fetch_matches())
+
+
+@app.route("/api/predict", methods=["GET", "POST"])
+def api_predict():
+    """
+    API de prédictions pour le modèle entraîné.
+    
+    Paramètres (GET ou POST):
+    - odds_1: Cote pour la victoire de l'équipe 1 (float, requis)
+    - odds_x: Cote pour le match nul (float, requis)
+    - odds_2: Cote pour la victoire de l'équipe 2 (float, requis)
+    
+    Retourne:
+    {
+        "success": true/false,
+        "model_used": "ml" ou "fallback",
+        "prediction": "1" ou "N" ou "2",
+        "confidence": 0.0-100.0,
+        "probabilities": {
+            "1": 0.0-100.0,
+            "N": 0.0-100.0,
+            "2": 0.0-100.0
+        },
+        "error": "message d'erreur" (si success=false)
+    }
+    """
+    # Récupération des paramètres (GET ou POST)
+    if request.method == "POST":
+        odds_1 = request.json.get("odds_1") if request.is_json else request.form.get("odds_1")
+        odds_x = request.json.get("odds_x") if request.is_json else request.form.get("odds_x")
+        odds_2 = request.json.get("odds_2") if request.is_json else request.form.get("odds_2")
+    else:
+        odds_1 = request.args.get("odds_1")
+        odds_x = request.args.get("odds_x")
+        odds_2 = request.args.get("odds_2")
+    
+    # Validation des paramètres
+    if not all([odds_1, odds_x, odds_2]):
+        return jsonify({
+            "success": False,
+            "error": "Paramètres manquants. Requis: odds_1, odds_x, odds_2"
+        }), 400
+    
+    # Conversion en float
+    try:
+        odds_1 = float(odds_1)
+        odds_x = float(odds_x)
+        odds_2 = float(odds_2)
+    except (ValueError, TypeError):
+        return jsonify({
+            "success": False,
+            "error": "Les cotes doivent être des nombres valides"
+        }), 400
+    
+    # Validation des valeurs (cotes doivent être > 1.0)
+    if any(odd <= 1.0 for odd in [odds_1, odds_x, odds_2]):
+        return jsonify({
+            "success": False,
+            "error": "Les cotes doivent être supérieures à 1.0"
+        }), 400
+    
+    # Utilisation du modèle ML si disponible, sinon fallback
+    model_used = "ml" if _MODEL is not None else "fallback"
+    result = ai_predict(odds_1, odds_x, odds_2)
+    
+    # Si le modèle n'est pas disponible, on informe l'utilisateur
+    if _MODEL is None:
+        return jsonify({
+            "success": True,
+            "model_used": "fallback",
+            "message": "Modèle ML non encore entraîné. Utilisation des probabilités implicites.",
+            "prediction": result["prediction"],
+            "confidence": result["confidence"],
+            "probabilities": result["probs"]
+        })
+    
+    # Modèle ML utilisé
+    return jsonify({
+        "success": True,
+        "model_used": "ml",
+        "prediction": result["prediction"],
+        "confidence": result["confidence"],
+        "probabilities": result["probs"],
+        "odds_input": {
+            "odds_1": odds_1,
+            "odds_x": odds_x,
+            "odds_2": odds_2
+        }
+    })
 
 
 @app.route("/tasks/collect", methods=["POST", "GET"])
