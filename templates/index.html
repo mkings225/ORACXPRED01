@@ -404,6 +404,60 @@
         flex-wrap: wrap;
         gap: 0.5rem;
       }
+
+      /* Optimisations mobile */
+      @media (max-width: 600px) {
+        header {
+          padding: 1rem 1rem 0.5rem;
+        }
+
+        main {
+          padding: 0 1rem 1rem;
+        }
+
+        footer {
+          padding: 0.5rem 1rem 1rem;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .logo-text h1 {
+          font-size: 1.1rem;
+        }
+
+        .logo-text p {
+          font-size: 0.7rem;
+        }
+
+        .toolbar {
+          width: 100%;
+          justify-content: flex-start;
+        }
+
+        .card-header h2 {
+          font-size: 1rem;
+        }
+
+        .table-wrapper {
+          max-height: none;
+        }
+
+        table {
+          min-width: 100%;
+          font-size: 0.75rem;
+        }
+
+        th,
+        td {
+          padding: 0.45rem 0.5rem;
+        }
+
+        /* On masque la colonne "Ligue" sur mobile pour gagner de la place */
+        th.th-league,
+        td.league {
+          display: none;
+        }
+      }
     </style>
   </head>
   <body>
@@ -438,7 +492,7 @@
             <table>
               <thead>
                 <tr>
-                  <th>Ligue</th>
+                  <th class="th-league">Ligue</th>
                   <th>Match</th>
                   <th>Score / Statut</th>
                   <th>Cote 1</th>
