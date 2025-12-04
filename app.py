@@ -1,8 +1,14 @@
 import os
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+import joblib
+import numpy as np
 import requests
-from flask import Flask, render_template, jsonify
+from flask import Flask, jsonify, render_template, request
+
+from collector import append_matches_to_csv
+from train_model import train_and_save_model
 
 app = Flask(__name__)
 
@@ -11,6 +17,19 @@ API_URL = (
     "?sports=85&count=40&lng=fr&gr=285&mode=4&country=96"
     "&getEmpty=true&virtualSports=true&noFilterBlockEvent=true"
 )
+
+BASE_DIR = Path(__file__).resolve().parent
+MODEL_PATH = BASE_DIR / "model.joblib"
+
+
+def _load_model():
+    try:
+        return joblib.load(MODEL_PATH)
+    except Exception:
+        return None
+
+
+_MODEL = _load_model()
 
 
 def extract_1x2_odds(event: Dict[str, Any]) -> Tuple[Optional[float], Optional[float], Optional[float]]:
@@ -67,12 +86,42 @@ def ai_predict(
     odds_2: Optional[float],
 ) -> Dict[str, Any]:
     """
-    Pseudo-IA : transforme les cotes en probabilités implicites
-    et choisit l’issue avec la probabilité la plus élevée.
+    IA de prédiction :
+    - si un modèle ML entraîné est disponible, on l'utilise ;
+    - sinon, on retombe sur la pseudo-IA basée sur les probabilités implicites.
     """
     if not all([odds_1, odds_x, odds_2]):
         return {"prediction": "indécis", "confidence": 0.0, "probs": {}}
 
+    # 1) Si un modèle est chargé, on l'utilise
+    if _MODEL is not None:
+        try:
+            X = np.array([[odds_1, odds_x, odds_2]], dtype=float)
+            proba = _MODEL.predict_proba(X)[0]
+            classes: List[str] = list(_MODEL.classes_)  # type: ignore[attr-defined]
+
+            probs = {cls: float(p) for cls, p in zip(classes, proba)}
+            # On ne garde que 1 / N / 2
+            for key in list(probs.keys()):
+                if key not in {"1", "N", "2"}:
+                    probs.pop(key, None)
+
+            if not probs:
+                raise ValueError("Aucune proba exploitable depuis le modèle.")
+
+            best = max(probs, key=probs.get)
+            conf = probs[best]
+
+            return {
+                "prediction": best,
+                "confidence": round(conf * 100, 1),
+                "probs": {k: round(v * 100, 1) for k, v in probs.items()},
+            }
+        except Exception:
+            # En cas de souci avec le modèle, on repasse sur la méthode simple
+            pass
+
+    # 2) Fallback : probabilités implicites à partir des cotes
     inv1 = 1.0 / odds_1
     invx = 1.0 / odds_x
     inv2 = 1.0 / odds_2
@@ -129,6 +178,16 @@ def fetch_matches() -> List[Dict[str, Any]]:
     return matches
 
 
+def _check_task_token() -> bool:
+    """Vérifie le token de sécurité pour les tâches 'cron' externes."""
+    expected = os.environ.get("TASK_TOKEN")
+    if not expected:
+        # Si aucun token défini côté serveur, on bloque par sécurité
+        return False
+    provided = request.args.get("token") or request.headers.get("X-Task-Token")
+    return provided == expected
+
+
 @app.route("/")
 def index() -> str:
     # On envoie une première liste pour ne pas avoir une page vide
@@ -140,6 +199,35 @@ def index() -> str:
 def api_matches():
     # Endpoint JSON utilisé par l’interface dynamique (AJAX)
     return jsonify(fetch_matches())
+
+
+@app.route("/tasks/collect", methods=["POST", "GET"])
+def task_collect():
+    """
+    Endpoint à appeler depuis un service de cron externe (ex: cron-job.org)
+    pour lancer la collecte et l'append dans data/matches.csv.
+    Protéger avec le paramètre ?token=... ou l'entête X-Task-Token.
+    """
+    if not _check_task_token():
+        return jsonify({"ok": False, "error": "unauthorized"}), 401
+
+    append_matches_to_csv()
+    return jsonify({"ok": True})
+
+
+@app.route("/tasks/train", methods=["POST", "GET"])
+def task_train():
+    """
+    Endpoint à appeler depuis un service de cron externe pour entraîner
+    le modèle et rafraîchir model.joblib, puis recharger le modèle en mémoire.
+    """
+    global _MODEL
+    if not _check_task_token():
+        return jsonify({"ok": False, "error": "unauthorized"}), 401
+
+    train_and_save_model()
+    _MODEL = _load_model()
+    return jsonify({"ok": True})
 
 
 if __name__ == "__main__":
