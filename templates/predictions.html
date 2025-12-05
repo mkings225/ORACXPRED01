@@ -4,350 +4,460 @@
     <meta charset="utf-8" />
     <title>ORACX PRED – Prédictions IA</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
       :root {
-        --bg: #020817;
-        --bg-card: rgba(15, 23, 42, 0.95);
-        --bg-card-soft: rgba(15, 23, 42, 0.7);
-        --accent: #22c55e;
-        --accent-soft: rgba(34, 197, 94, 0.12);
-        --accent-2: #38bdf8;
-        --danger: #fb7185;
-        --text: #e5e7eb;
-        --muted: #9ca3af;
-        --border: rgba(148, 163, 184, 0.3);
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --accent: #10b981;
+        --accent-glow: rgba(16, 185, 129, 0.4);
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --bg: #0a0e27;
+        --bg-elevated: #111827;
+        --bg-card: rgba(17, 24, 39, 0.8);
+        --text: #f9fafb;
+        --text-muted: #9ca3af;
+        --border: rgba(255, 255, 255, 0.1);
+        --glass: rgba(255, 255, 255, 0.05);
       }
 
       * {
+        margin: 0;
+        padding: 0;
         box-sizing: border-box;
       }
 
       body {
-        margin: 0;
-        min-height: 100vh;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-          sans-serif;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: var(--bg);
         color: var(--text);
-        background: radial-gradient(circle at top, #0f172a 0, #020617 45%, #000 100%);
-        display: flex;
-        flex-direction: column;
+        min-height: 100vh;
+        overflow-x: hidden;
+        position: relative;
+      }
+
+      body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+          radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+          radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
+          radial-gradient(circle at 40% 20%, rgba(245, 158, 11, 0.1) 0%, transparent 50%);
+        animation: gradientShift 20s ease infinite;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      @keyframes gradientShift {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
+      }
+
+      .particles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      .particle {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: var(--accent);
+        border-radius: 50%;
+        opacity: 0.3;
+        animation: float 15s infinite;
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(100vh) translateX(0) rotate(0deg);
+          opacity: 0;
+        }
+        10% { opacity: 0.3; }
+        90% { opacity: 0.3; }
+        100% {
+          transform: translateY(-100vh) translateX(100px) rotate(360deg);
+          opacity: 0;
+        }
       }
 
       header {
-        padding: 1.5rem 1.5rem 0.5rem;
+        position: relative;
+        z-index: 100;
+        padding: 2rem 3rem;
+        backdrop-filter: blur(20px);
+        background: rgba(17, 24, 39, 0.6);
+        border-bottom: 1px solid var(--border);
         display: flex;
-        flex-wrap: wrap;
-        align-items: center;
         justify-content: space-between;
-        gap: 1rem;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 2rem;
       }
 
       .logo {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 1rem;
       }
 
       .logo-mark {
-        width: 40px;
-        height: 40px;
-        border-radius: 999px;
-        background: conic-gradient(
-          from 210deg,
-          #22c55e,
-          #38bdf8,
-          #f97316,
-          #ec4899,
-          #22c55e
-        );
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 0 25px rgba(56, 189, 248, 0.5);
+        box-shadow: 0 8px 32px rgba(99, 102, 241, 0.4);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .logo-mark::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+        animation: shine 3s infinite;
+      }
+
+      @keyframes shine {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
       }
 
       .logo-mark span {
         font-weight: 800;
-        font-size: 1.1rem;
-        color: #020617;
+        font-size: 1.5rem;
+        color: white;
+        position: relative;
+        z-index: 1;
       }
 
       .logo-text h1 {
-        margin: 0;
-        font-size: 1.4rem;
-        letter-spacing: 0.05em;
+        font-size: 1.75rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--text) 0%, var(--text-muted) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -0.02em;
       }
 
       .logo-text p {
-        margin: 0.1rem 0 0;
-        font-size: 0.8rem;
-        color: var(--muted);
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
       }
 
       .nav-links {
         display: flex;
-        gap: 0.75rem;
-        align-items: center;
+        gap: 0.5rem;
+        background: var(--glass);
+        padding: 0.5rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
       }
 
       .nav-link {
-        padding: 0.5rem 1rem;
-        border-radius: 999px;
-        background: rgba(15, 23, 42, 0.9);
-        border: 1px solid var(--border);
-        color: var(--text);
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
         text-decoration: none;
-        font-size: 0.85rem;
-        transition: all 0.2s;
+        color: var(--text-muted);
+        font-weight: 500;
+        font-size: 0.875rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       .nav-link:hover {
-        background: rgba(34, 197, 94, 0.12);
-        border-color: var(--accent);
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.05);
       }
 
       .nav-link.active {
-        background: var(--accent-soft);
-        border-color: var(--accent);
-        color: var(--accent);
+        color: var(--text);
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
       }
 
       .toolbar {
         display: flex;
-        flex-wrap: wrap;
-        gap: 0.75rem;
+        gap: 1rem;
         align-items: center;
       }
 
-      .pill {
-        padding: 0.4rem 0.9rem;
-        border-radius: 999px;
-        background: rgba(15, 23, 42, 0.9);
+      .status-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.625rem 1.25rem;
+        background: var(--glass);
         border: 1px solid var(--border);
-        color: var(--muted);
-        font-size: 0.8rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
+        border-radius: 12px;
+        font-size: 0.875rem;
+        color: var(--text-muted);
       }
 
-      .pill .dot {
+      .status-dot {
         width: 8px;
         height: 8px;
-        border-radius: 999px;
-        background: #22c55e;
-        box-shadow: 0 0 10px rgba(34, 197, 94, 0.9);
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 12px var(--accent-glow);
+        animation: pulse 2s infinite;
       }
 
-      .pill strong {
+      @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.2); }
+      }
+
+      .status-badge strong {
         color: var(--accent);
+        font-weight: 600;
       }
 
-      .pill-button {
-        cursor: pointer;
-        transition: background 0.15s, transform 0.1s, box-shadow 0.1s;
+      .btn {
+        padding: 0.625rem 1.25rem;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
         border: none;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
         font-family: inherit;
       }
 
-      .pill-button:hover {
-        background: rgba(34, 197, 94, 0.12);
-        box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
-        transform: translateY(-1px);
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
       }
 
       main {
-        flex: 1;
-        padding: 0 1.5rem 1.5rem;
+        position: relative;
+        z-index: 10;
+        padding: 2rem 3rem;
+        max-width: 1800px;
+        margin: 0 auto;
+        width: 100%;
       }
 
       .predictions-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-        gap: 1.25rem;
-      }
-
-      @media (max-width: 600px) {
-        .predictions-grid {
-          grid-template-columns: 1fr;
-        }
+        grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+        gap: 2rem;
       }
 
       .prediction-card {
         background: var(--bg-card);
-        border-radius: 1.25rem;
-        border: 1px solid rgba(148, 163, 184, 0.3);
-        box-shadow: 0 24px 80px rgba(15, 23, 42, 0.9);
-        overflow: hidden;
-        backdrop-filter: blur(18px);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 2rem;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
-        padding: 1.5rem;
-        transition: transform 0.2s, box-shadow 0.2s;
-      }
-
-      .prediction-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 32px 100px rgba(15, 23, 42, 1);
+        overflow: hidden;
       }
 
       .prediction-card::before {
-        content: "";
+        content: '';
         position: absolute;
-        inset: 0;
-        background: radial-gradient(
-          circle at top left,
-          rgba(56, 189, 248, 0.18),
-          transparent 55%
-        );
-        opacity: 0.7;
-        pointer-events: none;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+      }
+
+      .prediction-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 32px 80px rgba(99, 102, 241, 0.3);
+        border-color: var(--primary);
       }
 
       .prediction-header {
-        position: relative;
-        z-index: 1;
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
       }
 
       .prediction-league {
         font-size: 0.75rem;
-        color: var(--muted);
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        margin-bottom: 0.5rem;
+        color: var(--text-muted);
+        margin-bottom: 0.75rem;
       }
 
       .prediction-teams {
-        font-size: 1.1rem;
+        font-size: 1.25rem;
         font-weight: 700;
-        margin-bottom: 0.75rem;
         line-height: 1.4;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, var(--text) 0%, var(--text-muted) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
 
       .prediction-status {
         display: inline-flex;
         align-items: center;
-        gap: 0.4rem;
-        padding: 0.3rem 0.7rem;
-        border-radius: 999px;
-        background: rgba(15, 23, 42, 0.9);
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: var(--glass);
         border: 1px solid var(--border);
-        font-size: 0.75rem;
-        color: var(--muted);
+        border-radius: 8px;
+        font-size: 0.875rem;
+        color: var(--text-muted);
       }
 
       .prediction-main {
-        position: relative;
-        z-index: 1;
-        margin: 1.5rem 0;
+        margin: 2rem 0;
       }
 
       .prediction-badge {
         display: inline-flex;
         align-items: center;
         gap: 0.75rem;
-        padding: 0.75rem 1.25rem;
-        border-radius: 0.75rem;
+        padding: 1rem 1.5rem;
+        border-radius: 16px;
         font-size: 1rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .prediction-badge::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.2) 50%, transparent 70%);
+        animation: shine 3s infinite;
       }
 
       .prediction-badge.chip-1 {
-        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-        color: #fff;
-        border: 1px solid rgba(34, 197, 94, 0.5);
-        box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
+        background: linear-gradient(135deg, var(--accent) 0%, #059669 100%);
+        color: white;
       }
 
       .prediction-badge.chip-N {
-        background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
-        color: #000;
-        border: 1px solid rgba(250, 204, 21, 0.5);
-        box-shadow: 0 4px 16px rgba(250, 204, 21, 0.4);
+        background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+        color: white;
       }
 
       .prediction-badge.chip-2 {
-        background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%);
-        color: #fff;
-        border: 1px solid rgba(251, 113, 133, 0.5);
-        box-shadow: 0 4px 16px rgba(251, 113, 133, 0.4);
+        background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+        color: white;
       }
 
       .prediction-badge.chip-indecis {
-        background: rgba(31, 41, 55, 0.9);
-        color: var(--muted);
+        background: var(--glass);
         border: 1px solid var(--border);
+        color: var(--text-muted);
       }
 
       .confidence-section {
-        position: relative;
-        z-index: 1;
-        margin-top: 1.5rem;
+        margin: 2rem 0;
       }
 
       .confidence-label {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.5rem;
-        font-size: 0.85rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.875rem;
+        color: var(--text-muted);
       }
 
       .confidence-value {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: var(--accent);
-        text-shadow: 0 0 12px rgba(34, 197, 94, 0.6);
+        font-size: 2rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 0 20px var(--accent-glow);
       }
 
       .confidence-bar {
         width: 100%;
         height: 12px;
-        background: rgba(15, 23, 42, 0.9);
+        background: var(--glass);
         border-radius: 999px;
         overflow: hidden;
-        border: 1px solid rgba(148, 163, 184, 0.2);
+        border: 1px solid var(--border);
         position: relative;
       }
 
       .confidence-fill {
         height: 100%;
-        background: linear-gradient(90deg, #22c55e, #4ade80, #eab308, #f97316, #ef4444);
-        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        background: linear-gradient(90deg, var(--accent) 0%, var(--primary) 50%, var(--warning) 100%);
+        transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
-        box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
+        box-shadow: 0 0 20px var(--accent-glow);
+      }
+
+      .confidence-fill::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        animation: shimmer 2s infinite;
+      }
+
+      @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
       }
 
       .probabilities {
-        position: relative;
-        z-index: 1;
-        margin-top: 1.5rem;
-        padding-top: 1.5rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
         border-top: 1px solid var(--border);
       }
 
       .prob-title {
-        font-size: 0.85rem;
-        color: var(--muted);
+        font-size: 0.875rem;
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.1em;
-        margin-bottom: 1rem;
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
       }
 
       .prob-item {
-        margin-bottom: 1rem;
+        margin-bottom: 1.5rem;
       }
 
       .prob-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 0.4rem;
-        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.875rem;
       }
 
       .prob-label {
@@ -355,11 +465,12 @@
         align-items: center;
         gap: 0.5rem;
         color: var(--text);
+        font-weight: 500;
       }
 
       .prob-value {
         font-weight: 700;
-        font-size: 1rem;
+        font-size: 1.125rem;
       }
 
       .prob-value.prob-1 {
@@ -367,7 +478,7 @@
       }
 
       .prob-value.prob-N {
-        color: #facc15;
+        color: var(--warning);
       }
 
       .prob-value.prob-2 {
@@ -377,52 +488,49 @@
       .prob-bar {
         width: 100%;
         height: 8px;
-        background: rgba(15, 23, 42, 0.9);
+        background: var(--glass);
         border-radius: 999px;
         overflow: hidden;
-        margin-top: 0.3rem;
+        margin-top: 0.5rem;
+        border: 1px solid var(--border);
       }
 
       .prob-bar-fill {
         height: 100%;
-        transition: width 0.5s ease-out;
+        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       .prob-bar-fill.prob-1 {
-        background: linear-gradient(90deg, #22c55e, #16a34a);
+        background: linear-gradient(90deg, var(--accent) 0%, #059669 100%);
       }
 
       .prob-bar-fill.prob-N {
-        background: linear-gradient(90deg, #facc15, #eab308);
+        background: linear-gradient(90deg, var(--warning) 0%, #d97706 100%);
       }
 
       .prob-bar-fill.prob-2 {
-        background: linear-gradient(90deg, #fb7185, #f43f5e);
+        background: linear-gradient(90deg, var(--danger) 0%, #dc2626 100%);
       }
 
       footer {
-        padding: 0.5rem 1.5rem 1rem;
-        font-size: 0.75rem;
-        color: var(--muted);
-        display: flex;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 0.5rem;
+        position: relative;
+        z-index: 10;
+        padding: 2rem 3rem;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.875rem;
+        border-top: 1px solid var(--border);
+        background: rgba(17, 24, 39, 0.6);
+        backdrop-filter: blur(20px);
       }
 
-      @media (max-width: 600px) {
+      @media (max-width: 768px) {
         header {
-          padding: 1rem 1rem 0.5rem;
+          padding: 1.5rem;
         }
 
         main {
-          padding: 0 1rem 1rem;
-        }
-
-        footer {
-          padding: 0.5rem 1rem 1rem;
-          flex-direction: column;
-          align-items: flex-start;
+          padding: 1.5rem;
         }
 
         .predictions-grid {
@@ -430,33 +538,33 @@
         }
 
         .prediction-card {
-          padding: 1rem;
+          padding: 1.5rem;
         }
       }
     </style>
   </head>
   <body>
+    <div class="particles" id="particles"></div>
+    
     <header>
       <div class="logo">
         <div class="logo-mark"><span>OX</span></div>
         <div class="logo-text">
           <h1>ORACX PRED</h1>
-          <p>Prédictions FIFA • Powered by 1xBet odds + IA</p>
+          <p>Prédictions FIFA • Powered by AI</p>
         </div>
       </div>
-      <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+      <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
         <div class="nav-links">
-          <a href="/" class="nav-link">📋 Matchs</a>
-          <a href="/predictions" class="nav-link active">🎯 Prédictions</a>
+          <a href="/" class="nav-link">Matchs</a>
+          <a href="/predictions" class="nav-link active">Prédictions</a>
         </div>
         <div class="toolbar">
-          <div class="pill">
-            <span class="dot"></span>
-            Flux temps réel <strong>ON</strong>
+          <div class="status-badge">
+            <span class="status-dot"></span>
+            <span>Live <strong>ON</strong></span>
           </div>
-          <button id="refreshBtn" class="pill pill-button">
-            🔁 Rafraîchir
-          </button>
+          <button id="refreshBtn" class="btn">🔄 Rafraîchir</button>
         </div>
       </div>
     </header>
@@ -503,7 +611,7 @@
 
             <div class="confidence-section">
               <div class="confidence-label">
-                <span>Confiance</span>
+                <span>Confiance IA</span>
                 <span class="confidence-value">{{ m.confidence }}%</span>
               </div>
               <div class="confidence-bar">
@@ -560,18 +668,31 @@
     </main>
 
     <footer>
-      <span>Source cotes : 1xBet API (FIFA virtuel)</span>
-      <span>Auto-refresh toutes les 20 secondes</span>
+      <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;">
+        <span>Source : 1xBet API</span>
+        <span>•</span>
+        <span>Auto-refresh : 20s</span>
+      </div>
     </footer>
 
     <script>
+      const particlesEl = document.getElementById('particles');
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 15 + 's';
+        particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+        particlesEl.appendChild(particle);
+      }
+
       const gridEl = document.getElementById("predictionsGrid");
       const refreshBtn = document.getElementById("refreshBtn");
 
       async function loadPredictions(manual = false) {
         try {
           if (manual) {
-            refreshBtn.textContent = "⏳ Rafraîchissement…";
+            refreshBtn.textContent = "⏳ Chargement…";
             refreshBtn.disabled = true;
           }
           const res = await fetch("/api/matches");
@@ -581,7 +702,7 @@
           console.error(e);
         } finally {
           if (manual) {
-            refreshBtn.textContent = "🔁 Rafraîchir";
+            refreshBtn.textContent = "🔄 Rafraîchir";
             refreshBtn.disabled = false;
           }
         }
@@ -631,7 +752,7 @@
 
               <div class="confidence-section">
                 <div class="confidence-label">
-                  <span>Confiance</span>
+                  <span>Confiance IA</span>
                   <span class="confidence-value">${m.confidence?.toFixed(1) || 0}%</span>
                 </div>
                 <div class="confidence-bar">
@@ -704,4 +825,3 @@
     </script>
   </body>
 </html>
-
