@@ -488,7 +488,7 @@
             </thead>
             <tbody id="matchesBody">
               {% for m in matches %}
-              <tr onclick="window.location.href='/predictions/{{ m.id }}'" data-match-id="{{ m.id }}">
+              <tr onclick="{% if m.id %}window.location.href='/predictions/{{ m.id }}'{% else %}alert('ID du match introuvable'){% endif %}" data-match-id="{{ m.id or '' }}">
                 <td class="league">{{ m.league }}</td>
                 <td>
                   <div class="teams">
@@ -570,11 +570,19 @@
         matches.forEach((m) => {
           const tr = document.createElement("tr");
           tr.style.cursor = "pointer";
+          
+          // S'assurer que l'ID existe
+          const matchId = m.id || m.match_id || 0;
+          
           tr.onclick = () => {
-            if (m.id) {
-              window.location.href = `/predictions/${m.id}`;
+            if (matchId && matchId !== 0) {
+              window.location.href = `/predictions/${matchId}`;
+            } else {
+              console.error("Match ID manquant:", m);
+              alert("Erreur : ID du match introuvable");
             }
           };
+          
           tr.innerHTML = `
             <td class="league">${m.league || "-"}</td>
             <td>
