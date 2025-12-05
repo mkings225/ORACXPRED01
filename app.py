@@ -1,3 +1,4 @@
+import hashlib
 import os
 import threading
 from pathlib import Path
@@ -229,9 +230,16 @@ def fetch_matches() -> List[Dict[str, Any]]:
         ai = ai_predict(odds_1, odds_x, odds_2)
         score1, score2, status = extract_score(ev)
 
+        # Générer un ID unique si l'ID de l'événement n'est pas disponible
+        event_id = ev.get("I")
+        if event_id is None:
+            # Utiliser un hash basé sur les équipes et la ligue comme ID de secours
+            match_str = f"{ev.get('L', '')}_{ev.get('O1', '')}_{ev.get('O2', '')}"
+            event_id = int(hashlib.md5(match_str.encode()).hexdigest()[:8], 16)
+        
         matches.append(
             {
-                "id": ev.get("I"),  # ID unique de l'événement
+                "id": event_id,
                 "league": ev.get("L"),
                 "team1": ev.get("O1"),
                 "team2": ev.get("O2"),
@@ -262,13 +270,20 @@ def index() -> str:
 @app.route("/predictions/<int:match_id>")
 def prediction_detail(match_id: int):
     """Page de prédiction détaillée pour un match spécifique."""
-    matches = fetch_matches()
-    match = next((m for m in matches if m.get("id") == match_id), None)
-    
-    if not match:
-        return render_template("prediction_not_found.html", match_id=match_id), 404
-    
-    return render_template("prediction_detail.html", match=match)
+    try:
+        matches = fetch_matches()
+        match = next((m for m in matches if m.get("id") == match_id), None)
+        
+        if not match:
+            return render_template("prediction_not_found.html", match_id=match_id), 404
+        
+        return render_template("prediction_detail.html", match=match)
+    except Exception as e:
+        # Log l'erreur pour le debug
+        print(f"[ERROR] Erreur dans prediction_detail: {e}")
+        import traceback
+        traceback.print_exc()
+        return f"<h1>Erreur serveur</h1><p>{str(e)}</p><a href='/'>Retour</a>", 500
 
 
 @app.route("/predictions")
