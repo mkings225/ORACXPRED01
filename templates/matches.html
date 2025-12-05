@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>ORACX PRED – Matchs FIFA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        --bg: #020817;
+        --bg-card: rgba(15, 23, 42, 0.95);
+        --bg-card-soft: rgba(15, 23, 42, 0.7);
+        --accent: #22c55e;
+        --accent-soft: rgba(34, 197, 94, 0.12);
+        --accent-2: #38bdf8;
+        --danger: #fb7185;
+        --text: #e5e7eb;
+        --muted: #9ca3af;
+        --border: rgba(148, 163, 184, 0.3);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+          sans-serif;
+        color: var(--text);
+        background: radial-gradient(circle at top, #0f172a 0, #020617 45%, #000 100%);
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        padding: 1.5rem 1.5rem 0.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .logo-mark {
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        background: conic-gradient(
+          from 210deg,
+          #22c55e,
+          #38bdf8,
+          #f97316,
+          #ec4899,
+          #22c55e
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 25px rgba(56, 189, 248, 0.5);
+      }
+
+      .logo-mark span {
+        font-weight: 800;
+        font-size: 1.1rem;
+        color: #020617;
+      }
+
+      .logo-text h1 {
+        margin: 0;
+        font-size: 1.4rem;
+        letter-spacing: 0.05em;
+      }
+
+      .logo-text p {
+        margin: 0.1rem 0 0;
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      .nav-link {
+        padding: 0.5rem 1rem;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid var(--border);
+        color: var(--text);
+        text-decoration: none;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+      }
+
+      .nav-link:hover {
+        background: rgba(34, 197, 94, 0.12);
+        border-color: var(--accent);
+      }
+
+      .nav-link.active {
+        background: var(--accent-soft);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      .pill {
+        padding: 0.4rem 0.9rem;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 0.8rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      .pill .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: #22c55e;
+        box-shadow: 0 0 10px rgba(34, 197, 94, 0.9);
+      }
+
+      .pill strong {
+        color: var(--accent);
+      }
+
+      .pill-button {
+        cursor: pointer;
+        transition: background 0.15s, transform 0.1s, box-shadow 0.1s;
+        border: none;
+        font-family: inherit;
+      }
+
+      .pill-button:hover {
+        background: rgba(34, 197, 94, 0.12);
+        box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
+        transform: translateY(-1px);
+      }
+
+      main {
+        flex: 1;
+        padding: 0 1.5rem 1.5rem;
+      }
+
+      .card {
+        background: var(--bg-card);
+        border-radius: 1.25rem;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        box-shadow: 0 24px 80px rgba(15, 23, 42, 0.9);
+        overflow: hidden;
+        backdrop-filter: blur(18px);
+        position: relative;
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          circle at top left,
+          rgba(56, 189, 248, 0.18),
+          transparent 55%
+        );
+        opacity: 0.7;
+        pointer-events: none;
+      }
+
+      .card-header {
+        padding: 1rem 1.25rem 0.75rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        position: relative;
+        z-index: 1;
+      }
+
+      .card-header h2 {
+        margin: 0;
+        font-size: 1.1rem;
+      }
+
+      .card-header span {
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+
+      .table-wrapper {
+        max-height: calc(100vh - 210px);
+        overflow: auto;
+        position: relative;
+        z-index: 1;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.82rem;
+        min-width: 780px;
+      }
+
+      thead {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+      }
+
+      thead tr {
+        background: linear-gradient(
+          to bottom,
+          rgba(15, 23, 42, 0.98),
+          rgba(15, 23, 42, 0.9)
+        );
+      }
+
+      th,
+      td {
+        padding: 0.55rem 0.75rem;
+        text-align: left;
+        white-space: nowrap;
+      }
+
+      th {
+        font-size: 0.75rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        backdrop-filter: blur(18px);
+      }
+
+      tbody tr {
+        background: rgba(15, 23, 42, 0.8);
+        transition: background 0.12s, transform 0.08s;
+      }
+
+      tbody tr:nth-child(odd) {
+        background: var(--bg-card-soft);
+      }
+
+      tbody tr:hover {
+        background: rgba(30, 64, 175, 0.75);
+        transform: translateY(-1px);
+      }
+
+      td {
+        border-bottom: 1px solid rgba(15, 23, 42, 0.7);
+      }
+
+      .league {
+        color: var(--muted);
+        font-size: 0.78rem;
+      }
+
+      .teams {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+      }
+
+      .team-main {
+        font-weight: 600;
+      }
+
+      .team-vs {
+        font-size: 0.78rem;
+        color: var(--muted);
+      }
+
+      .score-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.25rem 0.55rem;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid var(--border);
+        font-size: 0.78rem;
+      }
+
+      .score {
+        font-weight: 700;
+        letter-spacing: 0.06em;
+      }
+
+      .status {
+        color: var(--muted);
+        font-size: 0.72rem;
+      }
+
+      footer {
+        padding: 0.5rem 1.5rem 1rem;
+        font-size: 0.75rem;
+        color: var(--muted);
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      @media (max-width: 600px) {
+        header {
+          padding: 1rem 1rem 0.5rem;
+        }
+
+        main {
+          padding: 0 1rem 1rem;
+        }
+
+        footer {
+          padding: 0.5rem 1rem 1rem;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .logo-text h1 {
+          font-size: 1.1rem;
+        }
+
+        .logo-text p {
+          font-size: 0.7rem;
+        }
+
+        .toolbar {
+          width: 100%;
+          justify-content: flex-start;
+        }
+
+        .card-header h2 {
+          font-size: 1rem;
+        }
+
+        .table-wrapper {
+          max-height: none;
+        }
+
+        table {
+          min-width: 100%;
+          font-size: 0.75rem;
+        }
+
+        th,
+        td {
+          padding: 0.45rem 0.5rem;
+        }
+
+        th.th-league,
+        td.league {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <div class="logo-mark"><span>OX</span></div>
+        <div class="logo-text">
+          <h1>ORACX PRED</h1>
+          <p>Prédictions FIFA • Powered by 1xBet odds + IA</p>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <div class="nav-links">
+          <a href="/" class="nav-link active">📋 Matchs</a>
+          <a href="/predictions" class="nav-link">🎯 Prédictions</a>
+        </div>
+        <div class="toolbar">
+          <div class="pill">
+            <span class="dot"></span>
+            Flux temps réel <strong>ON</strong>
+          </div>
+          <button id="refreshBtn" class="pill pill-button">
+            🔁 Rafraîchir
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="card">
+        <div class="card-header">
+          <h2>Matchs en cours & à venir</h2>
+          <span id="lastUpdate">Mise à jour…</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th class="th-league">Ligue</th>
+                <th>Match</th>
+                <th>Score / Statut</th>
+                <th>Cote 1</th>
+                <th>Cote N</th>
+                <th>Cote 2</th>
+              </tr>
+            </thead>
+            <tbody id="matchesBody">
+              {% for m in matches %}
+              <tr>
+                <td class="league">{{ m.league }}</td>
+                <td>
+                  <div class="teams">
+                    <span class="team-main">{{ m.team1 }} vs {{ m.team2 }}</span>
+                    <span class="team-vs">Basé sur les cotes 1x2 en temps réel</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="score-badge">
+                    <span class="score">
+                      {% if m.score1 is not none and m.score2 is not none %}
+                        {{ m.score1 }}&nbsp;-&nbsp;{{ m.score2 }}
+                      {% else %}
+                        -
+                      {% endif %}
+                    </span>
+                    <span class="status">
+                      {{ m.status or 'Pré-match' }}
+                    </span>
+                  </div>
+                </td>
+                <td>{{ m.odds_1 or '-' }}</td>
+                <td>{{ m.odds_x or '-' }}</td>
+                <td>{{ m.odds_2 or '-' }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Source cotes : 1xBet API (FIFA virtuel)</span>
+      <span>Auto-refresh toutes les 20 secondes</span>
+    </footer>
+
+    <script>
+      const bodyEl = document.getElementById("matchesBody");
+      const lastUpdateEl = document.getElementById("lastUpdate");
+      const refreshBtn = document.getElementById("refreshBtn");
+
+      async function loadMatches(manual = false) {
+        try {
+          if (manual) {
+            refreshBtn.textContent = "⏳ Rafraîchissement…";
+            refreshBtn.disabled = true;
+          }
+          const res = await fetch("/api/matches");
+          const data = await res.json();
+          renderTable(data);
+          const now = new Date();
+          lastUpdateEl.textContent =
+            "Dernière mise à jour : " +
+            now.toLocaleTimeString("fr-FR", { hour12: false });
+        } catch (e) {
+          console.error(e);
+          lastUpdateEl.textContent = "Erreur de mise à jour";
+        } finally {
+          if (manual) {
+            refreshBtn.textContent = "🔁 Rafraîchir";
+            refreshBtn.disabled = false;
+          }
+        }
+      }
+
+      function renderTable(matches) {
+        bodyEl.innerHTML = "";
+        matches.forEach((m) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td class="league">${m.league || "-"}</td>
+            <td>
+              <div class="teams">
+                <span class="team-main">${m.team1 || "?"} vs ${m.team2 || "?"}</span>
+                <span class="team-vs">Basé sur les cotes 1x2 en temps réel</span>
+              </div>
+            </td>
+            <td>
+              <div class="score-badge">
+                <span class="score">${
+                  m.score1 !== null && m.score2 !== null
+                    ? `${m.score1}&nbsp;-&nbsp;${m.score2}`
+                    : "-"
+                }</span>
+                <span class="status">${m.status || "Pré-match"}</span>
+              </div>
+            </td>
+            <td>${m.odds_1 ?? "-"}</td>
+            <td>${m.odds_x ?? "-"}</td>
+            <td>${m.odds_2 ?? "-"}</td>
+          `;
+          bodyEl.appendChild(tr);
+        });
+      }
+
+      setInterval(() => loadMatches(false), 20000);
+      refreshBtn.addEventListener("click", () => loadMatches(true));
+      window.addEventListener("load", () => {
+        loadMatches(false);
+      });
+    </script>
+  </body>
+</html>
+
