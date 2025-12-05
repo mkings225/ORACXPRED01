@@ -1,10 +1,12 @@
 import os
+import threading
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 import joblib
 import numpy as np
 import requests
+from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask, jsonify, render_template, request
 
 from collector import append_matches_to_csv
@@ -30,6 +32,58 @@ def _load_model():
 
 
 _MODEL = _load_model()
+
+# Scheduler pour les tâches automatiques
+scheduler = BackgroundScheduler(daemon=True)
+
+
+def job_collect():
+    """Tâche planifiée : collecte des matchs."""
+    try:
+        append_matches_to_csv()
+        print("[SCHEDULER] Collecte effectuée avec succès")
+    except Exception as e:
+        print(f"[SCHEDULER] Erreur lors de la collecte: {e}")
+
+
+def job_train():
+    """Tâche planifiée : entraînement du modèle."""
+    global _MODEL
+    try:
+        train_and_save_model()
+        _MODEL = _load_model()
+        print("[SCHEDULER] Modèle entraîné et rechargé avec succès")
+    except Exception as e:
+        print(f"[SCHEDULER] Erreur lors de l'entraînement: {e}")
+
+
+# Configuration des tâches planifiées
+# Collecte toutes les 5 minutes
+scheduler.add_job(
+    func=job_collect,
+    trigger="interval",
+    minutes=5,
+    id="collect_job",
+    name="Collecte des matchs",
+    replace_existing=True,
+)
+
+# Entraînement tous les jours à 3h du matin
+scheduler.add_job(
+    func=job_train,
+    trigger="cron",
+    hour=3,
+    minute=0,
+    id="train_job",
+    name="Entraînement du modèle",
+    replace_existing=True,
+)
+
+# Démarrer le scheduler
+scheduler.start()
+print("[SCHEDULER] Tâches planifiées démarrées:")
+print("  - Collecte: toutes les 5 minutes")
+print("  - Entraînement: tous les jours à 3h00")
 
 
 def extract_1x2_odds(event: Dict[str, Any]) -> Tuple[Optional[float], Optional[float], Optional[float]]:
@@ -178,27 +232,31 @@ def fetch_matches() -> List[Dict[str, Any]]:
     return matches
 
 
-def _check_task_token() -> bool:
-    """Vérifie le token de sécurité pour les tâches 'cron' externes."""
-    expected = os.environ.get("TASK_TOKEN")
-    if not expected:
-        # Si aucun token défini côté serveur, on bloque par sécurité
-        return False
-    provided = request.args.get("token") or request.headers.get("X-Task-Token")
-    return provided == expected
-
-
 @app.route("/")
 def index() -> str:
-    # On envoie une première liste pour ne pas avoir une page vide
+    """Page principale : liste des matchs."""
     matches = fetch_matches()
-    return render_template("index.html", matches=matches)
+    return render_template("matches.html", matches=matches)
+
+
+@app.route("/predictions")
+def predictions() -> str:
+    """Page dédiée aux prédictions IA avec détails."""
+    matches = fetch_matches()
+    return render_template("predictions.html", matches=matches)
 
 
 @app.route("/api/matches")
 def api_matches():
-    # Endpoint JSON utilisé par l'interface dynamique (AJAX)
-    return jsonify(fetch_matches())
+    """
+    API : Liste de tous les matchs avec prédictions.
+    Retourne un tableau JSON de matchs.
+    """
+    try:
+        matches = fetch_matches()
+        return jsonify(matches)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/api/predict", methods=["GET", "POST"])
@@ -293,30 +351,78 @@ def api_predict():
 @app.route("/tasks/collect", methods=["POST", "GET"])
 def task_collect():
     """
-    Endpoint à appeler depuis un service de cron externe (ex: cron-job.org)
-    pour lancer la collecte et l'append dans data/matches.csv.
-    Protéger avec le paramètre ?token=... ou l'entête X-Task-Token.
+    Endpoint pour lancer la collecte manuellement.
+    Peut être appelé avec ?token=... pour sécurité (optionnel si TASK_TOKEN non défini).
     """
-    if not _check_task_token():
-        return jsonify({"ok": False, "error": "unauthorized"}), 401
+    # Vérification du token si défini, sinon autorisé
+    expected_token = os.environ.get("TASK_TOKEN")
+    if expected_token:
+        provided = request.args.get("token") or request.headers.get("X-Task-Token")
+        if provided != expected_token:
+            return jsonify({"ok": False, "error": "unauthorized"}), 401
 
-    append_matches_to_csv()
-    return jsonify({"ok": True})
+    try:
+        append_matches_to_csv()
+        return jsonify({"ok": True, "message": "Collecte effectuée avec succès"})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
 
 
 @app.route("/tasks/train", methods=["POST", "GET"])
 def task_train():
     """
-    Endpoint à appeler depuis un service de cron externe pour entraîner
-    le modèle et rafraîchir model.joblib, puis recharger le modèle en mémoire.
+    Endpoint pour lancer l'entraînement manuellement.
+    Peut être appelé avec ?token=... pour sécurité (optionnel si TASK_TOKEN non défini).
     """
     global _MODEL
-    if not _check_task_token():
-        return jsonify({"ok": False, "error": "unauthorized"}), 401
+    # Vérification du token si défini, sinon autorisé
+    expected_token = os.environ.get("TASK_TOKEN")
+    if expected_token:
+        provided = request.args.get("token") or request.headers.get("X-Task-Token")
+        if provided != expected_token:
+            return jsonify({"ok": False, "error": "unauthorized"}), 401
 
-    train_and_save_model()
-    _MODEL = _load_model()
-    return jsonify({"ok": True})
+    try:
+        train_and_save_model()
+        _MODEL = _load_model()
+        return jsonify({"ok": True, "message": "Modèle entraîné et rechargé avec succès"})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.route("/api/health")
+def api_health():
+    """API de santé : vérifie que le service fonctionne."""
+    return jsonify({
+        "status": "ok",
+        "model_loaded": _MODEL is not None,
+        "scheduler_running": scheduler.running if scheduler else False,
+    })
+
+
+@app.route("/api/stats")
+def api_stats():
+    """API : Statistiques du système."""
+    import os
+    from pathlib import Path
+    
+    data_path = Path(__file__).parent / "data" / "matches.csv"
+    model_path = Path(__file__).parent / "model.joblib"
+    
+    csv_exists = data_path.exists()
+    csv_size = data_path.stat().st_size if csv_exists else 0
+    
+    model_exists = model_path.exists()
+    model_size = model_path.stat().st_size if model_exists else 0
+    
+    return jsonify({
+        "model_loaded": _MODEL is not None,
+        "model_file_exists": model_exists,
+        "model_file_size": model_size,
+        "data_file_exists": csv_exists,
+        "data_file_size": csv_size,
+        "scheduler_running": scheduler.running if scheduler else False,
+    })
 
 
 if __name__ == "__main__":
