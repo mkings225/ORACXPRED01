@@ -36,25 +36,44 @@ _MODEL = _load_model()
 # Scheduler pour les tâches automatiques
 scheduler = BackgroundScheduler(daemon=True)
 
+# Tracking des dernières exécutions
+from datetime import datetime
+_last_collect_time = None
+_last_train_time = None
+_collect_count = 0
+_train_count = 0
+_last_collect_error = None
+_last_train_error = None
+
 
 def job_collect():
     """Tâche planifiée : collecte des matchs."""
+    global _last_collect_time, _collect_count, _last_collect_error
     try:
         append_matches_to_csv()
-        print("[SCHEDULER] Collecte effectuée avec succès")
+        _last_collect_time = datetime.now().isoformat()
+        _collect_count += 1
+        _last_collect_error = None
+        print(f"[SCHEDULER] ✅ Collecte #{_collect_count} effectuée avec succès à {_last_collect_time}")
     except Exception as e:
-        print(f"[SCHEDULER] Erreur lors de la collecte: {e}")
+        _last_collect_error = str(e)
+        print(f"[SCHEDULER] ❌ Erreur lors de la collecte #{_collect_count + 1}: {e}")
 
 
 def job_train():
     """Tâche planifiée : entraînement du modèle."""
-    global _MODEL
+    global _MODEL, _last_train_time, _train_count, _last_train_error
     try:
         train_and_save_model()
         _MODEL = _load_model()
-        print("[SCHEDULER] Modèle entraîné et rechargé avec succès")
+        _last_train_time = datetime.now().isoformat()
+        _train_count += 1
+        _last_train_error = None
+        print(f"[SCHEDULER] ✅ Modèle #{_train_count} entraîné et rechargé avec succès à {_last_train_time}")
+        print(f"[SCHEDULER] 📊 Modèle ML maintenant actif: {_MODEL is not None}")
     except Exception as e:
-        print(f"[SCHEDULER] Erreur lors de l'entraînement: {e}")
+        _last_train_error = str(e)
+        print(f"[SCHEDULER] ❌ Erreur lors de l'entraînement #{_train_count + 1}: {e}")
 
 
 # Configuration des tâches planifiées
@@ -330,7 +349,8 @@ def api_predict():
             "message": "Modèle ML non encore entraîné. Utilisation des probabilités implicites.",
             "prediction": result["prediction"],
             "confidence": result["confidence"],
-            "probabilities": result["probs"]
+            "probabilities": result["probs"],
+            "note": "Pour activer le modèle ML, attendez l'entraînement automatique (3h00) ou lancez /tasks/train manuellement"
         })
     
     # Modèle ML utilisé
@@ -403,7 +423,6 @@ def api_health():
 @app.route("/api/stats")
 def api_stats():
     """API : Statistiques du système."""
-    import os
     from pathlib import Path
     
     data_path = Path(__file__).parent / "data" / "matches.csv"
@@ -415,13 +434,69 @@ def api_stats():
     model_exists = model_path.exists()
     model_size = model_path.stat().st_size if model_exists else 0
     
+    # Compter les lignes dans le CSV (sans le header)
+    csv_lines = 0
+    if csv_exists:
+        try:
+            with open(data_path, 'r', encoding='utf-8') as f:
+                csv_lines = sum(1 for line in f) - 1  # -1 pour le header
+        except:
+            pass
+    
     return jsonify({
-        "model_loaded": _MODEL is not None,
-        "model_file_exists": model_exists,
-        "model_file_size": model_size,
-        "data_file_exists": csv_exists,
-        "data_file_size": csv_size,
-        "scheduler_running": scheduler.running if scheduler else False,
+        "model": {
+            "loaded": _MODEL is not None,
+            "file_exists": model_exists,
+            "file_size": model_size,
+            "prediction_method": "ML (modèle entraîné)" if _MODEL is not None else "Mathématique (probabilités implicites)"
+        },
+        "data": {
+            "file_exists": csv_exists,
+            "file_size": csv_size,
+            "matches_count": csv_lines
+        },
+        "scheduler": {
+            "running": scheduler.running if scheduler else False,
+            "collect": {
+                "count": _collect_count,
+                "last_time": _last_collect_time,
+                "last_error": _last_collect_error
+            },
+            "train": {
+                "count": _train_count,
+                "last_time": _last_train_time,
+                "last_error": _last_train_error
+            }
+        }
+    })
+
+
+@app.route("/api/scheduler")
+def api_scheduler():
+    """API : État détaillé du scheduler."""
+    jobs_info = []
+    if scheduler and scheduler.running:
+        for job in scheduler.get_jobs():
+            jobs_info.append({
+                "id": job.id,
+                "name": job.name,
+                "next_run": job.next_run_time.isoformat() if job.next_run_time else None,
+                "trigger": str(job.trigger)
+            })
+    
+    return jsonify({
+        "running": scheduler.running if scheduler else False,
+        "jobs": jobs_info,
+        "collect_stats": {
+            "total_executions": _collect_count,
+            "last_execution": _last_collect_time,
+            "last_error": _last_collect_error
+        },
+        "train_stats": {
+            "total_executions": _train_count,
+            "last_execution": _last_train_time,
+            "last_error": _last_train_error
+        }
     })
 
 
