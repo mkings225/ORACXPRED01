@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>ORACX PRED – Prédictions IA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        --bg: #020817;
+        --bg-card: rgba(15, 23, 42, 0.95);
+        --bg-card-soft: rgba(15, 23, 42, 0.7);
+        --accent: #22c55e;
+        --accent-soft: rgba(34, 197, 94, 0.12);
+        --accent-2: #38bdf8;
+        --danger: #fb7185;
+        --text: #e5e7eb;
+        --muted: #9ca3af;
+        --border: rgba(148, 163, 184, 0.3);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+          sans-serif;
+        color: var(--text);
+        background: radial-gradient(circle at top, #0f172a 0, #020617 45%, #000 100%);
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        padding: 1.5rem 1.5rem 0.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .logo-mark {
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        background: conic-gradient(
+          from 210deg,
+          #22c55e,
+          #38bdf8,
+          #f97316,
+          #ec4899,
+          #22c55e
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 25px rgba(56, 189, 248, 0.5);
+      }
+
+      .logo-mark span {
+        font-weight: 800;
+        font-size: 1.1rem;
+        color: #020617;
+      }
+
+      .logo-text h1 {
+        margin: 0;
+        font-size: 1.4rem;
+        letter-spacing: 0.05em;
+      }
+
+      .logo-text p {
+        margin: 0.1rem 0 0;
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      .nav-link {
+        padding: 0.5rem 1rem;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid var(--border);
+        color: var(--text);
+        text-decoration: none;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+      }
+
+      .nav-link:hover {
+        background: rgba(34, 197, 94, 0.12);
+        border-color: var(--accent);
+      }
+
+      .nav-link.active {
+        background: var(--accent-soft);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        align-items: center;
+      }
+
+      .pill {
+        padding: 0.4rem 0.9rem;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 0.8rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      .pill .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: #22c55e;
+        box-shadow: 0 0 10px rgba(34, 197, 94, 0.9);
+      }
+
+      .pill strong {
+        color: var(--accent);
+      }
+
+      .pill-button {
+        cursor: pointer;
+        transition: background 0.15s, transform 0.1s, box-shadow 0.1s;
+        border: none;
+        font-family: inherit;
+      }
+
+      .pill-button:hover {
+        background: rgba(34, 197, 94, 0.12);
+        box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
+        transform: translateY(-1px);
+      }
+
+      main {
+        flex: 1;
+        padding: 0 1.5rem 1.5rem;
+      }
+
+      .predictions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.25rem;
+      }
+
+      @media (max-width: 600px) {
+        .predictions-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .prediction-card {
+        background: var(--bg-card);
+        border-radius: 1.25rem;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        box-shadow: 0 24px 80px rgba(15, 23, 42, 0.9);
+        overflow: hidden;
+        backdrop-filter: blur(18px);
+        position: relative;
+        padding: 1.5rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .prediction-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 32px 100px rgba(15, 23, 42, 1);
+      }
+
+      .prediction-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          circle at top left,
+          rgba(56, 189, 248, 0.18),
+          transparent 55%
+        );
+        opacity: 0.7;
+        pointer-events: none;
+      }
+
+      .prediction-header {
+        position: relative;
+        z-index: 1;
+        margin-bottom: 1rem;
+      }
+
+      .prediction-league {
+        font-size: 0.75rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 0.5rem;
+      }
+
+      .prediction-teams {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        line-height: 1.4;
+      }
+
+      .prediction-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid var(--border);
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+
+      .prediction-main {
+        position: relative;
+        z-index: 1;
+        margin: 1.5rem 0;
+      }
+
+      .prediction-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1.25rem;
+        border-radius: 0.75rem;
+        font-size: 1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        margin-bottom: 1rem;
+      }
+
+      .prediction-badge.chip-1 {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        color: #fff;
+        border: 1px solid rgba(34, 197, 94, 0.5);
+        box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
+      }
+
+      .prediction-badge.chip-N {
+        background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
+        color: #000;
+        border: 1px solid rgba(250, 204, 21, 0.5);
+        box-shadow: 0 4px 16px rgba(250, 204, 21, 0.4);
+      }
+
+      .prediction-badge.chip-2 {
+        background: linear-gradient(135deg, #fb7185 0%, #f43f5e 100%);
+        color: #fff;
+        border: 1px solid rgba(251, 113, 133, 0.5);
+        box-shadow: 0 4px 16px rgba(251, 113, 133, 0.4);
+      }
+
+      .prediction-badge.chip-indecis {
+        background: rgba(31, 41, 55, 0.9);
+        color: var(--muted);
+        border: 1px solid var(--border);
+      }
+
+      .confidence-section {
+        position: relative;
+        z-index: 1;
+        margin-top: 1.5rem;
+      }
+
+      .confidence-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+      }
+
+      .confidence-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--accent);
+        text-shadow: 0 0 12px rgba(34, 197, 94, 0.6);
+      }
+
+      .confidence-bar {
+        width: 100%;
+        height: 12px;
+        background: rgba(15, 23, 42, 0.9);
+        border-radius: 999px;
+        overflow: hidden;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        position: relative;
+      }
+
+      .confidence-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22c55e, #4ade80, #eab308, #f97316, #ef4444);
+        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
+      }
+
+      .probabilities {
+        position: relative;
+        z-index: 1;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border);
+      }
+
+      .prob-title {
+        font-size: 0.85rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 1rem;
+      }
+
+      .prob-item {
+        margin-bottom: 1rem;
+      }
+
+      .prob-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.4rem;
+        font-size: 0.9rem;
+      }
+
+      .prob-label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text);
+      }
+
+      .prob-value {
+        font-weight: 700;
+        font-size: 1rem;
+      }
+
+      .prob-value.prob-1 {
+        color: var(--accent);
+      }
+
+      .prob-value.prob-N {
+        color: #facc15;
+      }
+
+      .prob-value.prob-2 {
+        color: var(--danger);
+      }
+
+      .prob-bar {
+        width: 100%;
+        height: 8px;
+        background: rgba(15, 23, 42, 0.9);
+        border-radius: 999px;
+        overflow: hidden;
+        margin-top: 0.3rem;
+      }
+
+      .prob-bar-fill {
+        height: 100%;
+        transition: width 0.5s ease-out;
+      }
+
+      .prob-bar-fill.prob-1 {
+        background: linear-gradient(90deg, #22c55e, #16a34a);
+      }
+
+      .prob-bar-fill.prob-N {
+        background: linear-gradient(90deg, #facc15, #eab308);
+      }
+
+      .prob-bar-fill.prob-2 {
+        background: linear-gradient(90deg, #fb7185, #f43f5e);
+      }
+
+      footer {
+        padding: 0.5rem 1.5rem 1rem;
+        font-size: 0.75rem;
+        color: var(--muted);
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      @media (max-width: 600px) {
+        header {
+          padding: 1rem 1rem 0.5rem;
+        }
+
+        main {
+          padding: 0 1rem 1rem;
+        }
+
+        footer {
+          padding: 0.5rem 1rem 1rem;
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .predictions-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .prediction-card {
+          padding: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <div class="logo-mark"><span>OX</span></div>
+        <div class="logo-text">
+          <h1>ORACX PRED</h1>
+          <p>Prédictions FIFA • Powered by 1xBet odds + IA</p>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <div class="nav-links">
+          <a href="/" class="nav-link">📋 Matchs</a>
+          <a href="/predictions" class="nav-link active">🎯 Prédictions</a>
+        </div>
+        <div class="toolbar">
+          <div class="pill">
+            <span class="dot"></span>
+            Flux temps réel <strong>ON</strong>
+          </div>
+          <button id="refreshBtn" class="pill pill-button">
+            🔁 Rafraîchir
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div class="predictions-grid" id="predictionsGrid">
+        {% for m in matches %}
+        <div class="prediction-card">
+          <div class="prediction-header">
+            <div class="prediction-league">{{ m.league }}</div>
+            <div class="prediction-teams">{{ m.team1 }} vs {{ m.team2 }}</div>
+            <div class="prediction-status">
+              {% if m.score1 is not none and m.score2 is not none %}
+                <span>{{ m.score1 }} - {{ m.score2 }}</span>
+              {% else %}
+                <span>{{ m.status or 'Pré-match' }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="prediction-main">
+            {% set p = m.prediction %}
+            {% if p == '1' %}
+              <div class="prediction-badge chip-1">
+                <span>⚽</span>
+                <span>Victoire {{ m.team1 }}</span>
+              </div>
+            {% elif p == '2' %}
+              <div class="prediction-badge chip-2">
+                <span>⚽</span>
+                <span>Victoire {{ m.team2 }}</span>
+              </div>
+            {% elif p == 'N' %}
+              <div class="prediction-badge chip-N">
+                <span>🤝</span>
+                <span>Match nul</span>
+              </div>
+            {% else %}
+              <div class="prediction-badge chip-indecis">
+                <span>❓</span>
+                <span>Indécis</span>
+              </div>
+            {% endif %}
+
+            <div class="confidence-section">
+              <div class="confidence-label">
+                <span>Confiance</span>
+                <span class="confidence-value">{{ m.confidence }}%</span>
+              </div>
+              <div class="confidence-bar">
+                <div class="confidence-fill" style="width: {{ m.confidence }}%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="probabilities">
+            <div class="prob-title">Probabilités détaillées</div>
+            
+            <div class="prob-item">
+              <div class="prob-row">
+                <span class="prob-label">
+                  <span>⚽</span>
+                  <span>Victoire {{ m.team1 }}</span>
+                </span>
+                <span class="prob-value prob-1">{{ m.prob_1 or '-' }}%</span>
+              </div>
+              <div class="prob-bar">
+                <div class="prob-bar-fill prob-1" style="width: {{ m.prob_1 or 0 }}%;"></div>
+              </div>
+            </div>
+
+            <div class="prob-item">
+              <div class="prob-row">
+                <span class="prob-label">
+                  <span>🤝</span>
+                  <span>Match nul</span>
+                </span>
+                <span class="prob-value prob-N">{{ m.prob_x or '-' }}%</span>
+              </div>
+              <div class="prob-bar">
+                <div class="prob-bar-fill prob-N" style="width: {{ m.prob_x or 0 }}%;"></div>
+              </div>
+            </div>
+
+            <div class="prob-item">
+              <div class="prob-row">
+                <span class="prob-label">
+                  <span>⚽</span>
+                  <span>Victoire {{ m.team2 }}</span>
+                </span>
+                <span class="prob-value prob-2">{{ m.prob_2 or '-' }}%</span>
+              </div>
+              <div class="prob-bar">
+                <div class="prob-bar-fill prob-2" style="width: {{ m.prob_2 or 0 }}%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </main>
+
+    <footer>
+      <span>Source cotes : 1xBet API (FIFA virtuel)</span>
+      <span>Auto-refresh toutes les 20 secondes</span>
+    </footer>
+
+    <script>
+      const gridEl = document.getElementById("predictionsGrid");
+      const refreshBtn = document.getElementById("refreshBtn");
+
+      async function loadPredictions(manual = false) {
+        try {
+          if (manual) {
+            refreshBtn.textContent = "⏳ Rafraîchissement…";
+            refreshBtn.disabled = true;
+          }
+          const res = await fetch("/api/matches");
+          const data = await res.json();
+          renderPredictions(data);
+        } catch (e) {
+          console.error(e);
+        } finally {
+          if (manual) {
+            refreshBtn.textContent = "🔁 Rafraîchir";
+            refreshBtn.disabled = false;
+          }
+        }
+      }
+
+      function renderPredictions(matches) {
+        gridEl.innerHTML = "";
+        matches.forEach((m) => {
+          const card = document.createElement("div");
+          card.className = "prediction-card";
+          
+          const prediction = m.prediction;
+          let badgeClass = "chip-indecis";
+          let badgeIcon = "❓";
+          let badgeText = "Indécis";
+          
+          if (prediction === "1") {
+            badgeClass = "chip-1";
+            badgeIcon = "⚽";
+            badgeText = `Victoire ${escapeHtml(m.team1 || "Équipe 1")}`;
+          } else if (prediction === "2") {
+            badgeClass = "chip-2";
+            badgeIcon = "⚽";
+            badgeText = `Victoire ${escapeHtml(m.team2 || "Équipe 2")}`;
+          } else if (prediction === "N") {
+            badgeClass = "chip-N";
+            badgeIcon = "🤝";
+            badgeText = "Match nul";
+          }
+
+          const scoreText = m.score1 !== null && m.score2 !== null
+            ? `${m.score1} - ${m.score2}`
+            : (m.status || "Pré-match");
+
+          card.innerHTML = `
+            <div class="prediction-header">
+              <div class="prediction-league">${escapeHtml(m.league || "")}</div>
+              <div class="prediction-teams">${escapeHtml(m.team1 || "?")} vs ${escapeHtml(m.team2 || "?")}</div>
+              <div class="prediction-status">${escapeHtml(scoreText)}</div>
+            </div>
+
+            <div class="prediction-main">
+              <div class="prediction-badge ${badgeClass}">
+                <span>${badgeIcon}</span>
+                <span>${badgeText}</span>
+              </div>
+
+              <div class="confidence-section">
+                <div class="confidence-label">
+                  <span>Confiance</span>
+                  <span class="confidence-value">${m.confidence?.toFixed(1) || 0}%</span>
+                </div>
+                <div class="confidence-bar">
+                  <div class="confidence-fill" style="width: ${m.confidence || 0}%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="probabilities">
+              <div class="prob-title">Probabilités détaillées</div>
+              
+              <div class="prob-item">
+                <div class="prob-row">
+                  <span class="prob-label">
+                    <span>⚽</span>
+                    <span>Victoire ${escapeHtml(m.team1 || "Équipe 1")}</span>
+                  </span>
+                  <span class="prob-value prob-1">${m.prob_1?.toFixed(1) || "-"}%</span>
+                </div>
+                <div class="prob-bar">
+                  <div class="prob-bar-fill prob-1" style="width: ${m.prob_1 || 0}%;"></div>
+                </div>
+              </div>
+
+              <div class="prob-item">
+                <div class="prob-row">
+                  <span class="prob-label">
+                    <span>🤝</span>
+                    <span>Match nul</span>
+                  </span>
+                  <span class="prob-value prob-N">${m.prob_x?.toFixed(1) || "-"}%</span>
+                </div>
+                <div class="prob-bar">
+                  <div class="prob-bar-fill prob-N" style="width: ${m.prob_x || 0}%;"></div>
+                </div>
+              </div>
+
+              <div class="prob-item">
+                <div class="prob-row">
+                  <span class="prob-label">
+                    <span>⚽</span>
+                    <span>Victoire ${escapeHtml(m.team2 || "Équipe 2")}</span>
+                  </span>
+                  <span class="prob-value prob-2">${m.prob_2?.toFixed(1) || "-"}%</span>
+                </div>
+                <div class="prob-bar">
+                  <div class="prob-bar-fill prob-2" style="width: ${m.prob_2 || 0}%;"></div>
+                </div>
+              </div>
+            </div>
+          `;
+          gridEl.appendChild(card);
+        });
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      setInterval(() => loadPredictions(false), 20000);
+      refreshBtn.addEventListener("click", () => loadPredictions(true));
+      window.addEventListener("load", () => {
+        loadPredictions(false);
+      });
+    </script>
+  </body>
+</html>
+
