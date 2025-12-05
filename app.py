@@ -7,7 +7,7 @@ import joblib
 import numpy as np
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, redirect, render_template, request
 
 from collector import append_matches_to_csv
 from train_model import train_and_save_model
@@ -231,6 +231,7 @@ def fetch_matches() -> List[Dict[str, Any]]:
 
         matches.append(
             {
+                "id": ev.get("I"),  # ID unique de l'événement
                 "league": ev.get("L"),
                 "team1": ev.get("O1"),
                 "team2": ev.get("O2"),
@@ -258,11 +259,22 @@ def index() -> str:
     return render_template("matches.html", matches=matches)
 
 
-@app.route("/predictions")
-def predictions() -> str:
-    """Page dédiée aux prédictions IA avec détails."""
+@app.route("/predictions/<int:match_id>")
+def prediction_detail(match_id: int):
+    """Page de prédiction détaillée pour un match spécifique."""
     matches = fetch_matches()
-    return render_template("predictions.html", matches=matches)
+    match = next((m for m in matches if m.get("id") == match_id), None)
+    
+    if not match:
+        return render_template("prediction_not_found.html", match_id=match_id), 404
+    
+    return render_template("prediction_detail.html", match=match)
+
+
+@app.route("/predictions")
+def predictions_redirect():
+    """Redirection vers la page des matchs si accès direct."""
+    return redirect("/")
 
 
 @app.route("/api/matches")
