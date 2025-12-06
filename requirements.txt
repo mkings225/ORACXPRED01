@@ -1,0 +1,13 @@
+flask
+requests
+numpy
+pandas
+scikit-learn
+joblib
+apscheduler
+sqlalchemy
+psycopg2-binary
+alembic
+python-dotenv
+
+
