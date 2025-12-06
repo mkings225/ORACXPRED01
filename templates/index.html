@@ -3,7 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <title>ORACX PRED – Prédictions FIFA</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <style>
       :root {
         --bg: #020817;
@@ -507,33 +510,47 @@
         gap: 0.5rem;
       }
 
-      /* Optimisations mobile */
-      @media (max-width: 600px) {
+      /* Optimisations mobile - Tous formats (iPhone, Android, etc.) */
+      @media (max-width: 768px) {
         header {
-          padding: 1rem 1rem 0.5rem;
+          padding: 1rem;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 1rem;
+        }
+
+        .logo {
+          width: 100%;
+        }
+
+        .toolbar {
+          width: 100%;
+          justify-content: space-between;
+        }
+
+        .pill-button {
+          font-size: 0.85rem;
+          padding: 0.5rem 1rem;
         }
 
         main {
           padding: 0 1rem 1rem;
         }
 
-        footer {
-          padding: 0.5rem 1rem 1rem;
+        .grid {
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+
+        .card {
+          border-radius: 1rem;
+        }
+
+        .card-header {
+          padding: 1rem;
           flex-direction: column;
           align-items: flex-start;
-        }
-
-        .logo-text h1 {
-          font-size: 1.1rem;
-        }
-
-        .logo-text p {
-          font-size: 0.7rem;
-        }
-
-        .toolbar {
-          width: 100%;
-          justify-content: flex-start;
+          gap: 0.5rem;
         }
 
         .card-header h2 {
@@ -542,22 +559,138 @@
 
         .table-wrapper {
           max-height: none;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
         }
 
         table {
           min-width: 100%;
+          font-size: 0.8rem;
+        }
+
+        th,
+        td {
+          padding: 0.6rem 0.5rem;
+          font-size: 0.8rem;
+        }
+
+        /* Masquer certaines colonnes sur mobile */
+        th.th-league,
+        td.league {
+          display: none;
+        }
+
+        /* Colonnes prédiction et confiance sur 2 lignes */
+        .prediction-cell,
+        .confidence-cell {
+          min-width: auto;
+        }
+
+        footer {
+          padding: 1rem;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          gap: 0.5rem;
+          font-size: 0.7rem;
+        }
+
+        .side-panel {
+          padding: 1rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        /* Optimisations pour petits écrans (iPhone SE, etc.) */
+        header {
+          padding: 0.75rem;
+        }
+
+        .logo-mark {
+          width: 36px;
+          height: 36px;
+        }
+
+        .logo-mark span {
+          font-size: 0.9rem;
+        }
+
+        .logo-text h1 {
+          font-size: 1rem;
+        }
+
+        .logo-text p {
+          font-size: 0.65rem;
+        }
+
+        .pill {
+          font-size: 0.75rem;
+          padding: 0.35rem 0.75rem;
+        }
+
+        .card-header h2 {
+          font-size: 0.95rem;
+        }
+
+        table {
           font-size: 0.75rem;
         }
 
         th,
         td {
-          padding: 0.45rem 0.5rem;
+          padding: 0.5rem 0.4rem;
+          font-size: 0.75rem;
         }
 
-        /* On masque la colonne "Ligue" sur mobile pour gagner de la place */
-        th.th-league,
-        td.league {
+        .team-main {
+          font-size: 0.85rem;
+        }
+
+        .team-vs {
+          font-size: 0.7rem;
+        }
+
+        .chip {
+          font-size: 0.75rem;
+          padding: 0.3rem 0.6rem;
+        }
+
+        .confidence-bar {
+          height: 6px;
+        }
+
+        .conf-value {
+          font-size: 0.85rem;
+        }
+
+        /* Masquer encore plus de colonnes sur très petits écrans */
+        th:nth-child(4),
+        td:nth-child(4),
+        th:nth-child(5),
+        td:nth-child(5),
+        th:nth-child(6),
+        td:nth-child(6) {
           display: none;
+        }
+      }
+
+      /* Améliorations tactiles pour mobile */
+      @media (hover: none) and (pointer: coarse) {
+        tbody tr {
+          -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .pill-button,
+        button {
+          min-height: 44px; /* Taille minimale pour le touch */
+          min-width: 44px;
+        }
+      }
+
+      /* Orientation paysage sur mobile */
+      @media (max-width: 768px) and (orientation: landscape) {
+        .table-wrapper {
+          max-height: 60vh;
         }
       }
     </style>

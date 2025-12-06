@@ -3,7 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <title>ORACX PRED – Matchs FIFA</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -417,28 +420,123 @@
         backdrop-filter: blur(20px);
       }
 
+      /* Optimisations mobile - Tous formats */
       @media (max-width: 768px) {
         header {
-          padding: 1.5rem;
-        }
-
-        main {
-          padding: 1.5rem;
-        }
-
-        .card-header {
-          padding: 1.5rem;
+          padding: 1rem;
           flex-direction: column;
           align-items: flex-start;
           gap: 1rem;
         }
 
-        th, td {
+        .logo {
+          width: 100%;
+        }
+
+        .nav-links {
+          width: 100%;
+          justify-content: flex-start;
+        }
+
+        main {
           padding: 1rem;
+        }
+
+        .card {
+          border-radius: 1rem;
+        }
+
+        .card-header {
+          padding: 1rem;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.75rem;
+        }
+
+        .card-header h2 {
+          font-size: 1rem;
+        }
+
+        .table-wrapper {
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          max-height: none;
+        }
+
+        table {
+          font-size: 0.8rem;
+          min-width: 100%;
+        }
+
+        th, td {
+          padding: 0.75rem 0.5rem;
+          font-size: 0.8rem;
         }
 
         .th-league, .league {
           display: none;
+        }
+
+        footer {
+          padding: 1rem;
+          font-size: 0.7rem;
+          flex-direction: column;
+          text-align: center;
+          gap: 0.5rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        /* Petits écrans (iPhone SE, etc.) */
+        header {
+          padding: 0.75rem;
+        }
+
+        .logo-mark {
+          width: 36px;
+          height: 36px;
+        }
+
+        .logo-text h1 {
+          font-size: 1rem;
+        }
+
+        .logo-text p {
+          font-size: 0.7rem;
+        }
+
+        .card-header h2 {
+          font-size: 0.9rem;
+        }
+
+        table {
+          font-size: 0.75rem;
+        }
+
+        th, td {
+          padding: 0.6rem 0.4rem;
+          font-size: 0.75rem;
+        }
+
+        .team-main {
+          font-size: 0.85rem;
+        }
+
+        .team-vs {
+          font-size: 0.7rem;
+        }
+      }
+
+      /* Améliorations tactiles */
+      @media (hover: none) and (pointer: coarse) {
+        tbody tr {
+          -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
+          min-height: 48px;
+        }
+
+        button, .pill-button {
+          min-height: 44px;
+          min-width: 44px;
         }
       }
     </style>

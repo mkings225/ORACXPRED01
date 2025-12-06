@@ -3,7 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <title>ORACX PRED – Matchs Collectés</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -267,21 +270,149 @@
         color: var(--text);
       }
 
+      /* Optimisations mobile - Tous formats */
       @media (max-width: 768px) {
         body {
           padding: 1rem;
         }
 
-        .card {
+        header {
           padding: 1rem;
         }
 
+        .logo {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.75rem;
+        }
+
+        .logo-mark {
+          width: 40px;
+          height: 40px;
+        }
+
+        h1 {
+          font-size: 1.3rem;
+        }
+
+        .subtitle {
+          font-size: 0.8rem;
+        }
+
+        .nav-links {
+          width: 100%;
+          margin-top: 1rem;
+        }
+
+        .nav-link {
+          flex: 1;
+          text-align: center;
+          padding: 0.75rem;
+        }
+
+        .stats {
+          width: 100%;
+          flex-direction: column;
+        }
+
+        .stat-card {
+          width: 100%;
+        }
+
+        .card {
+          padding: 1rem;
+          border-radius: 1rem;
+        }
+
+        .card-header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.75rem;
+        }
+
+        .card-header h2 {
+          font-size: 1rem;
+        }
+
+        .table-wrapper {
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+
         table {
-          font-size: 0.85rem;
+          font-size: 0.8rem;
+          min-width: 100%;
         }
 
         th, td {
           padding: 0.75rem 0.5rem;
+          font-size: 0.8rem;
+          white-space: nowrap;
+        }
+
+        /* Masquer certaines colonnes sur mobile */
+        th:nth-child(1),
+        td:nth-child(1) {
+          display: none; /* Date/heure */
+        }
+      }
+
+      @media (max-width: 480px) {
+        /* Petits écrans */
+        body {
+          padding: 0.75rem;
+        }
+
+        header {
+          padding: 0.75rem;
+        }
+
+        .logo-mark {
+          width: 36px;
+          height: 36px;
+        }
+
+        h1 {
+          font-size: 1.1rem;
+        }
+
+        .card {
+          padding: 0.75rem;
+        }
+
+        table {
+          font-size: 0.75rem;
+        }
+
+        th, td {
+          padding: 0.6rem 0.4rem;
+          font-size: 0.75rem;
+        }
+
+        .team-main {
+          font-size: 0.85rem;
+        }
+
+        /* Masquer plus de colonnes sur très petits écrans */
+        th:nth-child(6),
+        td:nth-child(6),
+        th:nth-child(7),
+        td:nth-child(7),
+        th:nth-child(8),
+        td:nth-child(8) {
+          display: none; /* Cotes */
+        }
+      }
+
+      /* Améliorations tactiles */
+      @media (hover: none) and (pointer: coarse) {
+        tbody tr {
+          -webkit-tap-highlight-color: rgba(255, 255, 255, 0.1);
+          min-height: 48px;
+        }
+
+        .nav-link {
+          min-height: 44px;
         }
       }
     </style>
@@ -378,7 +509,7 @@
             <h3>Aucun match collecté</h3>
             <p>Les matchs collectés apparaîtront ici une fois que la collecte automatique aura commencé.</p>
             <p style="margin-top: 1rem; font-size: 0.9rem;">
-              <a href="/tasks/collect" style="color: var(--accent);">Lancer une collecte manuelle</a>
+              <a href="/collect" style="color: var(--accent); text-decoration: none; padding: 0.5rem 1rem; background: var(--accent); color: white; border-radius: 8px; display: inline-block; margin-top: 0.5rem;">Lancer une collecte manuelle</a>
             </p>
           </div>
           {% endif %}

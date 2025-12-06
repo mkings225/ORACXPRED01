@@ -3,7 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <title>Match introuvable – ORACX PRED</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
     <style>
       body {
         font-family: system-ui, sans-serif;
@@ -39,6 +41,53 @@
       }
       a:hover {
         text-decoration: underline;
+      }
+
+      /* Optimisations mobile */
+      @media (max-width: 768px) {
+        body {
+          padding: 1rem;
+        }
+
+        .error-card {
+          padding: 2rem 1.5rem;
+          border-radius: 1rem;
+        }
+
+        h1 {
+          font-size: 1.5rem;
+        }
+
+        p {
+          font-size: 0.9rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        body {
+          padding: 0.75rem;
+        }
+
+        .error-card {
+          padding: 1.5rem 1rem;
+        }
+
+        h1 {
+          font-size: 1.3rem;
+        }
+
+        p {
+          font-size: 0.85rem;
+        }
+
+        a {
+          display: inline-block;
+          padding: 0.75rem 1.5rem;
+          background: rgba(99, 102, 241, 0.2);
+          border-radius: 8px;
+          min-height: 44px;
+          line-height: 1.5;
+        }
       }
     </style>
   </head>
