@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: oracxpred-web
+    env: python
+    buildCommand: pip install -r requirements.txt && python setup_render.py
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --threads 2 --timeout 120
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: PORT
+        value: 10000
+      - key: PYTHON_VERSION
+        value: 3.11.0
+    healthCheckPath: /
+
+databases:
+  - name: oracxpred-db
+    databaseName: oracxpred
+    user: oracxpred
+    plan: free
+

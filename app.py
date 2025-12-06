@@ -24,7 +24,7 @@ try:
         session = SessionLocal()
         session.close()
         USE_POSTGRESQL = True
-        print("[APP] ✅ Mode PostgreSQL activé et connecté")
+        print("[APP] OK Mode PostgreSQL active et connecte")
         append_matches_to_csv = append_matches_to_db
     except Exception as db_error:
         # PostgreSQL installé mais non accessible
@@ -82,14 +82,15 @@ def job_collect():
     """Tâche planifiée : collecte des matchs."""
     global _last_collect_time, _collect_count, _last_collect_error
     try:
+        print(f"[SCHEDULER] Demarrage de la collecte #{_collect_count + 1}...")
         append_matches_to_csv()
         _last_collect_time = datetime.now().isoformat()
         _collect_count += 1
         _last_collect_error = None
-        print(f"[SCHEDULER] ✅ Collecte #{_collect_count} effectuée avec succès à {_last_collect_time}")
+        print(f"[SCHEDULER] OK Collecte #{_collect_count} effectuee avec succes a {_last_collect_time}")
     except Exception as e:
         _last_collect_error = f"{str(e)}\n{traceback.format_exc()}"
-        print(f"[SCHEDULER] ❌ Erreur lors de la collecte #{_collect_count + 1}: {e}")
+        print(f"[SCHEDULER] ERREUR lors de la collecte #{_collect_count + 1}: {e}")
         traceback.print_exc()
 
 
@@ -136,13 +137,13 @@ scheduler.add_job(
 try:
     if not scheduler.running:
         scheduler.start()
-        print("[SCHEDULER] ✅ Tâches planifiées démarrées avec succès:")
-        print("  - Collecte: toutes les 1 minute (permanent, même sans utilisateurs)")
-        print("  - Entraînement: tous les jours à 3h00")
+        print("[SCHEDULER] OK Taches planifiees demarrees avec succes:")
+        print("  - Collecte: toutes les 1 minute (permanent, meme sans utilisateurs)")
+        print("  - Entrainement: tous les jours a 3h00")
     else:
-        print("[SCHEDULER] ⚠️ Scheduler déjà en cours d'exécution")
+        print("[SCHEDULER] ATTENTION Scheduler deja en cours d'execution")
 except Exception as e:
-    print(f"[SCHEDULER] ❌ Erreur lors du démarrage du scheduler: {e}")
+    print(f"[SCHEDULER] ERREUR lors du demarrage du scheduler: {e}")
     traceback.print_exc()
 
 
@@ -531,15 +532,33 @@ def api_predict():
 def task_collect():
     """
     Endpoint pour lancer la collecte manuellement.
-    Peut être appelé avec ?token=... pour sécurité (optionnel si TASK_TOKEN non défini).
+    Accessible publiquement pour usage manuel.
+    Pour sécuriser, définir TASK_TOKEN dans les variables d'environnement.
     """
-    # Vérification du token si défini, sinon autorisé
+    # Vérification du token si défini, sinon autorisé (pour usage manuel facile)
     expected_token = os.environ.get("TASK_TOKEN")
     if expected_token:
         provided = request.args.get("token") or request.headers.get("X-Task-Token")
-        if provided != expected_token:
-            return jsonify({"ok": False, "error": "unauthorized"}), 401
+        if not provided or provided != expected_token:
+            return jsonify({
+                "ok": False, 
+                "error": "unauthorized",
+                "message": "Token requis. Utilisez ?token=VOTRE_TOKEN ou définissez TASK_TOKEN dans les variables d'environnement."
+            }), 401
 
+    try:
+        append_matches_to_csv()
+        return jsonify({"ok": True, "message": "Collecte effectuée avec succès"})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.route("/collect", methods=["POST", "GET"])
+def collect_public():
+    """
+    Endpoint public pour lancer la collecte manuellement (sans token requis).
+    Version simplifiée pour usage manuel depuis le navigateur.
+    """
     try:
         append_matches_to_csv()
         return jsonify({"ok": True, "message": "Collecte effectuée avec succès"})

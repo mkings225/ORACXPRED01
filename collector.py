@@ -98,19 +98,43 @@ def is_match_finished(status: str, score1: Optional[int], score2: Optional[int])
     """
     Vérifie si un match est terminé.
     Un match est considéré comme terminé si :
-    - Le statut contient des mots-clés indiquant la fin (terminé, finished, fin, etc.)
-    - ET les scores sont disponibles
+    - Les scores sont disponibles (score1 et score2 non None)
+    - ET (le statut contient des mots-clés indiquant la fin OU le statut est vide/None mais les scores existent)
+    
+    STRATÉGIE AMÉLIORÉE:
+    - Si les scores existent ET le statut indique "terminé" -> TERMINÉ
+    - Si les scores existent ET le statut est vide/None -> TERMINÉ (scores = match fini)
+    - Si les scores existent ET le statut ne contient pas "live", "en cours", "playing" -> TERMINÉ
     """
+    # Pas de scores = match pas terminé
     if score1 is None or score2 is None:
         return False
     
-    status_lower = status.lower()
+    # Si on a des scores, on vérifie le statut
+    status_lower = (status or "").lower().strip()
+    
+    # Mots-clés indiquant que le match est EN COURS (donc pas terminé)
+    live_keywords = ["live", "en cours", "playing", "ongoing", "in progress", "started", "commencé"]
+    if any(keyword in status_lower for keyword in live_keywords):
+        return False
+    
+    # Mots-clés indiquant que le match est TERMINÉ
     finished_keywords = [
         "terminé", "terminé", "terminé", "finished", "fin", "end", "fini",
-        "match terminé", "game finished", "ended", "final"
+        "match terminé", "game finished", "ended", "final", "ft", "full time",
+        "complete", "complet", "closed", "fermé"
     ]
+    if any(keyword in status_lower for keyword in finished_keywords):
+        return True
     
-    return any(keyword in status_lower for keyword in finished_keywords)
+    # Si le statut est vide ou None mais qu'on a des scores, on considère que c'est terminé
+    # (les scores ne sont généralement disponibles qu'après la fin du match)
+    if not status_lower or status_lower in ["", "none", "null"]:
+        return True
+    
+    # Par défaut, si on a des scores et que le statut n'indique pas "live", on considère terminé
+    # C'est plus permissif pour capturer tous les matchs finis
+    return True
 
 
 def match_exists_in_csv(event_id: Optional[int], team1: str, team2: str, league: str) -> bool:
@@ -234,8 +258,12 @@ def append_matches_to_csv() -> None:
                     score1, score2, status = extract_score(ev)
                     
                     # Vérifier si le match est terminé
-                    if not is_match_finished(status, score1, score2):
+                    is_finished = is_match_finished(status, score1, score2)
+                    if not is_finished:
                         matches_skipped_not_finished += 1
+                        # Log détaillé pour debug
+                        if score1 is not None and score2 is not None:
+                            print(f"[COLLECTOR] DEBUG Match ignore (non termine): {team1} vs {team2} - Score: {score1}-{score2} - Statut: {status!r}")
                         continue
                     
                     # Vérifier si le match existe déjà dans le CSV
