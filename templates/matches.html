@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>ORACX PRED – Matchs FIFA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+      
+      :root {
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --accent: #10b981;
+        --accent-glow: rgba(16, 185, 129, 0.4);
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        --bg: #0a0e27;
+        --bg-elevated: #111827;
+        --bg-card: rgba(17, 24, 39, 0.8);
+        --text: #f9fafb;
+        --text-muted: #9ca3af;
+        --border: rgba(255, 255, 255, 0.1);
+        --glass: rgba(255, 255, 255, 0.05);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        overflow-x: hidden;
+        position: relative;
+      }
+
+      /* Animated background */
+      body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+          radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+          radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
+          radial-gradient(circle at 40% 20%, rgba(245, 158, 11, 0.1) 0%, transparent 50%);
+        animation: gradientShift 20s ease infinite;
+        z-index: 0;
+        pointer-events: none;
+      }
+
+      @keyframes gradientShift {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.8; }
+      }
+
+      /* Floating particles */
+      .particles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      .particle {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: var(--accent);
+        border-radius: 50%;
+        opacity: 0.3;
+        animation: float 15s infinite;
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(100vh) translateX(0) rotate(0deg);
+          opacity: 0;
+        }
+        10% {
+          opacity: 0.3;
+        }
+        90% {
+          opacity: 0.3;
+        }
+        100% {
+          transform: translateY(-100vh) translateX(100px) rotate(360deg);
+          opacity: 0;
+        }
+      }
+
+      header {
+        position: relative;
+        z-index: 100;
+        padding: 2rem 3rem;
+        backdrop-filter: blur(20px);
+        background: rgba(17, 24, 39, 0.6);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 2rem;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .logo-mark {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 32px rgba(99, 102, 241, 0.4);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .logo-mark::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+        animation: shine 3s infinite;
+      }
+
+      @keyframes shine {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+      }
+
+      .logo-mark span {
+        font-weight: 800;
+        font-size: 1.5rem;
+        color: white;
+        position: relative;
+        z-index: 1;
+      }
+
+      .logo-text h1 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--text) 0%, var(--text-muted) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -0.02em;
+      }
+
+      .logo-text p {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+        margin-top: 0.25rem;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 0.5rem;
+        background: var(--glass);
+        padding: 0.5rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+      }
+
+      .nav-link {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--text-muted);
+        font-weight: 500;
+        font-size: 0.875rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+      }
+
+      .nav-link:hover {
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .nav-link.active {
+        color: var(--text);
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+      }
+
+      .toolbar {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      .status-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.625rem 1.25rem;
+        background: var(--glass);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        font-size: 0.875rem;
+        color: var(--text-muted);
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 12px var(--accent-glow);
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.2); }
+      }
+
+      .status-badge strong {
+        color: var(--accent);
+        font-weight: 600;
+      }
+
+      .btn {
+        padding: 0.625rem 1.25rem;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-weight: 600;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+        font-family: inherit;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+      }
+
+      .btn:active {
+        transform: translateY(0);
+      }
+
+      main {
+        position: relative;
+        z-index: 10;
+        padding: 2rem 3rem;
+        max-width: 1600px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      .card {
+        background: var(--bg-card);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        border: 1px solid var(--border);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        position: relative;
+      }
+
+      .card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        opacity: 0.5;
+      }
+
+      .card-header {
+        padding: 2rem 2.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .card-header h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      .card-header .update-time {
+        font-size: 0.875rem;
+        color: var(--text-muted);
+      }
+
+      .table-wrapper {
+        overflow-x: auto;
+        max-height: calc(100vh - 300px);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: var(--bg-card);
+        backdrop-filter: blur(20px);
+      }
+
+      th {
+        padding: 1.25rem 1.5rem;
+        text-align: left;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--text-muted);
+        border-bottom: 1px solid var(--border);
+      }
+
+      tbody tr {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+
+      tbody tr:hover {
+        background: rgba(99, 102, 241, 0.1);
+        transform: scale(1.01);
+      }
+
+      tbody tr:active {
+        transform: scale(0.99);
+      }
+
+      td {
+        padding: 1.25rem 1.5rem;
+        font-size: 0.875rem;
+      }
+
+      .league {
+        color: var(--text-muted);
+        font-size: 0.8125rem;
+        font-weight: 500;
+      }
+
+      .teams {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .team-main {
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      .team-vs {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+      }
+
+      .score-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 1rem;
+        background: var(--glass);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.875rem;
+      }
+
+      .score {
+        font-weight: 700;
+        color: var(--text);
+        letter-spacing: 0.05em;
+      }
+
+      .status {
+        color: var(--text-muted);
+        font-size: 0.75rem;
+      }
+
+      footer {
+        position: relative;
+        z-index: 10;
+        padding: 2rem 3rem;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.875rem;
+        border-top: 1px solid var(--border);
+        background: rgba(17, 24, 39, 0.6);
+        backdrop-filter: blur(20px);
+      }
+
+      @media (max-width: 768px) {
+        header {
+          padding: 1.5rem;
+        }
+
+        main {
+          padding: 1.5rem;
+        }
+
+        .card-header {
+          padding: 1.5rem;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 1rem;
+        }
+
+        th, td {
+          padding: 1rem;
+        }
+
+        .th-league, .league {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="particles" id="particles"></div>
+    
+    <header>
+      <div class="logo">
+        <div class="logo-mark"><span>OX</span></div>
+        <div class="logo-text">
+          <h1>ORACX PRED</h1>
+          <p>Prédictions FIFA • Powered by AI</p>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+        <div class="nav-links">
+          <a href="/" class="nav-link active">Matchs</a>
+          <a href="/collected" class="nav-link">Matchs Collectés</a>
+        </div>
+        <div class="toolbar">
+          <div class="status-badge">
+            <span class="status-dot"></span>
+            <span>Live <strong>ON</strong></span>
+          </div>
+          <button id="refreshBtn" class="btn">🔄 Rafraîchir</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="card">
+        <div class="card-header">
+          <h2>Matchs en cours & à venir</h2>
+          <span class="update-time" id="lastUpdate">Mise à jour…</span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th class="th-league">Ligue</th>
+                <th>Match</th>
+                <th>Score / Statut</th>
+                <th>Cote 1</th>
+                <th>Cote N</th>
+                <th>Cote 2</th>
+              </tr>
+            </thead>
+            <tbody id="matchesBody">
+              {% if matches %}
+                {% for m in matches %}
+                <tr onclick="{% if m.id %}window.location.href='/predictions/{{ m.id }}'{% else %}alert('ID du match introuvable'){% endif %}" data-match-id="{{ m.id or '' }}">
+                  <td class="league">{{ m.league }}</td>
+                  <td>
+                    <div class="teams">
+                      <span class="team-main">{{ m.team1 }} vs {{ m.team2 }}</span>
+                      <span class="team-vs">Temps réel • Cliquez pour voir la prédiction</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="score-badge">
+                      <span class="score">
+                        {% if m.score1 is not none and m.score2 is not none %}
+                          {{ m.score1 }}&nbsp;-&nbsp;{{ m.score2 }}
+                        {% else %}
+                          -
+                        {% endif %}
+                      </span>
+                      <span class="status">{{ m.status or 'Pré-match' }}</span>
+                    </div>
+                  </td>
+                  <td>{{ m.odds_1 or '-' }}</td>
+                  <td>{{ m.odds_x or '-' }}</td>
+                  <td>{{ m.odds_2 or '-' }}</td>
+                </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="6" style="text-align: center; padding: 2rem; color: var(--muted);">
+                    <p>⚠️ Impossible de récupérer les matchs depuis l'API 1xBet</p>
+                    <p style="font-size: 0.85rem; margin-top: 0.5rem;">Vérifiez votre connexion internet ou réessayez plus tard.</p>
+                  </td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;">
+        <span>Source : 1xBet API</span>
+        <span>•</span>
+        <span>Auto-refresh permanent : 5 secondes</span>
+      </div>
+    </footer>
+
+    <script>
+      // Particles animation
+      const particlesEl = document.getElementById('particles');
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 15 + 's';
+        particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+        particlesEl.appendChild(particle);
+      }
+
+      const bodyEl = document.getElementById("matchesBody");
+      const lastUpdateEl = document.getElementById("lastUpdate");
+      const refreshBtn = document.getElementById("refreshBtn");
+
+      async function loadMatches(manual = false) {
+        try {
+          if (manual) {
+            refreshBtn.textContent = "⏳ Chargement…";
+            refreshBtn.disabled = true;
+          }
+          const res = await fetch("/api/matches");
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+          }
+          const data = await res.json();
+          renderTable(data);
+          const now = new Date();
+          lastUpdateEl.textContent = "Dernière mise à jour : " + now.toLocaleTimeString("fr-FR", { hour12: false });
+        } catch (e) {
+          console.error("Erreur lors du chargement des matchs:", e);
+          lastUpdateEl.textContent = "Erreur de connexion à l'API";
+          // Afficher un message d'erreur dans le tableau
+          bodyEl.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 2rem; color: var(--muted);">
+                <p>⚠️ Impossible de récupérer les matchs</p>
+                <p style="font-size: 0.85rem; margin-top: 0.5rem;">Erreur: ${e.message || 'Connexion à l\'API impossible'}</p>
+                <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--muted);">Vérifiez votre connexion internet ou réessayez plus tard.</p>
+              </td>
+            </tr>
+          `;
+        } finally {
+          if (manual) {
+            refreshBtn.textContent = "🔄 Rafraîchir";
+            refreshBtn.disabled = false;
+          }
+        }
+      }
+
+      function renderTable(matches) {
+        bodyEl.innerHTML = "";
+        if (!matches || matches.length === 0) {
+          bodyEl.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 2rem; color: var(--muted);">
+                <p>ℹ️ Aucun match disponible pour le moment</p>
+                <p style="font-size: 0.85rem; margin-top: 0.5rem;">Les matchs apparaîtront ici dès qu'ils seront disponibles.</p>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+        matches.forEach((m) => {
+          const tr = document.createElement("tr");
+          tr.style.cursor = "pointer";
+          
+          // S'assurer que l'ID existe
+          const matchId = m.id || m.match_id || 0;
+          
+          tr.onclick = () => {
+            if (matchId && matchId !== 0) {
+              window.location.href = `/predictions/${matchId}`;
+            } else {
+              console.error("Match ID manquant:", m);
+              alert("Erreur : ID du match introuvable");
+            }
+          };
+          
+          tr.innerHTML = `
+            <td class="league">${m.league || "-"}</td>
+            <td>
+              <div class="teams">
+                <span class="team-main">${m.team1 || "?"} vs ${m.team2 || "?"}</span>
+                <span class="team-vs">Temps réel • Cliquez pour voir la prédiction</span>
+              </div>
+            </td>
+            <td>
+              <div class="score-badge">
+                <span class="score">${
+                  m.score1 !== null && m.score2 !== null
+                    ? `${m.score1}&nbsp;-&nbsp;${m.score2}`
+                    : "-"
+                }</span>
+                <span class="status">${m.status || "Pré-match"}</span>
+              </div>
+            </td>
+            <td>${m.odds_1 ?? "-"}</td>
+            <td>${m.odds_x ?? "-"}</td>
+            <td>${m.odds_2 ?? "-"}</td>
+          `;
+          bodyEl.appendChild(tr);
+        });
+      }
+
+      // Auto-refresh permanent toutes les 5 secondes pour rafraîchissement instantané
+      setInterval(() => loadMatches(false), 5000);
+      refreshBtn.addEventListener("click", () => loadMatches(true));
+      window.addEventListener("load", () => {
+        loadMatches(false);
+      });
+    </script>
+  </body>
+</html>

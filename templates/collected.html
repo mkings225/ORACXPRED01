@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <title>ORACX PRED – Matchs Collectés</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+      
+      :root {
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --accent: #10b981;
+        --bg: #0a0e27;
+        --bg-elevated: #111827;
+        --bg-card: rgba(17, 24, 39, 0.8);
+        --text: #f9fafb;
+        --text-muted: #9ca3af;
+        --border: rgba(255, 255, 255, 0.1);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      header {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        backdrop-filter: blur(10px);
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .logo-mark {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, var(--primary), var(--accent));
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: white;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+      }
+
+      .subtitle {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+      }
+
+      .nav-link {
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--text);
+        transition: all 0.2s;
+        border: 1px solid transparent;
+      }
+
+      .nav-link:hover {
+        background: var(--bg-elevated);
+        border-color: var(--border);
+      }
+
+      .nav-link.active {
+        background: var(--primary);
+        color: white;
+      }
+
+      .stats {
+        display: flex;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+      }
+
+      .stat-card {
+        background: var(--bg-elevated);
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+      }
+
+      .stat-label {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-bottom: 0.25rem;
+      }
+
+      .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--accent);
+      }
+
+      .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 2rem;
+        backdrop-filter: blur(10px);
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .card-header h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+
+      .table-wrapper {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      thead {
+        background: var(--bg-elevated);
+      }
+
+      th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        border-bottom: 2px solid var(--border);
+      }
+
+      td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border);
+      }
+
+      tbody tr {
+        transition: background 0.2s;
+      }
+
+      tbody tr:hover {
+        background: var(--bg-elevated);
+      }
+
+      .league {
+        font-weight: 600;
+        color: var(--accent);
+        font-size: 0.9rem;
+      }
+
+      .teams {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .team-main {
+        font-weight: 600;
+        font-size: 1rem;
+      }
+
+      .team-vs {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+      }
+
+      .score-badge {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .score {
+        font-weight: 700;
+        font-size: 1.1rem;
+      }
+
+      .status {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+      }
+
+      .outcome {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+
+      .outcome-1 {
+        background: rgba(34, 197, 94, 0.2);
+        color: #22c55e;
+      }
+
+      .outcome-N {
+        background: rgba(250, 204, 21, 0.2);
+        color: #facc15;
+      }
+
+      .outcome-2 {
+        background: rgba(59, 130, 246, 0.2);
+        color: #3b82f6;
+      }
+
+      .timestamp {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-muted);
+      }
+
+      .empty-state h3 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+        color: var(--text);
+      }
+
+      @media (max-width: 768px) {
+        body {
+          padding: 1rem;
+        }
+
+        .card {
+          padding: 1rem;
+        }
+
+        table {
+          font-size: 0.85rem;
+        }
+
+        th, td {
+          padding: 0.75rem 0.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div class="logo">
+          <div class="logo-mark"><span>OX</span></div>
+          <div>
+            <h1>ORACX PRED</h1>
+            <p class="subtitle">Matchs Collectés • Base de données</p>
+          </div>
+        </div>
+        <div class="nav-links">
+          <a href="/" class="nav-link">Matchs Live</a>
+          <a href="/collected" class="nav-link active">Matchs Collectés</a>
+        </div>
+        <div class="stats">
+          <div class="stat-card">
+            <div class="stat-label">Total de matchs</div>
+            <div class="stat-value">{{ total_count }}</div>
+          </div>
+        </div>
+      </header>
+
+      <main>
+        <section class="card">
+          <div class="card-header">
+            <h2>Historique des matchs collectés</h2>
+          </div>
+          {% if matches %}
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date/Heure</th>
+                  <th>Ligue</th>
+                  <th>Match</th>
+                  <th>Score</th>
+                  <th>Statut</th>
+                  <th>Cote 1</th>
+                  <th>Cote N</th>
+                  <th>Cote 2</th>
+                  <th>Résultat</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for m in matches %}
+                <tr>
+                  <td class="timestamp">{{ m.timestamp[:19] if m.timestamp else '-' }}</td>
+                  <td class="league">{{ m.league or '-' }}</td>
+                  <td>
+                    <div class="teams">
+                      <span class="team-main">{{ m.team1 or '?' }} vs {{ m.team2 or '?' }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="score-badge">
+                      <span class="score">
+                        {% if m.score1 is not none and m.score2 is not none %}
+                          {{ m.score1 }} - {{ m.score2 }}
+                        {% else %}
+                          -
+                        {% endif %}
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="status">{{ m.status or '-' }}</span>
+                  </td>
+                  <td>{{ m.odds_1 if m.odds_1 else '-' }}</td>
+                  <td>{{ m.odds_x if m.odds_x else '-' }}</td>
+                  <td>{{ m.odds_2 if m.odds_2 else '-' }}</td>
+                  <td>
+                    {% if m.outcome %}
+                      <span class="outcome outcome-{{ m.outcome }}">
+                        {% if m.outcome == '1' %}Victoire 1
+                        {% elif m.outcome == 'N' %}Nul
+                        {% elif m.outcome == '2' %}Victoire 2
+                        {% else %}{{ m.outcome }}{% endif %}
+                      </span>
+                    {% else %}
+                      <span class="status">-</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="empty-state">
+            <h3>Aucun match collecté</h3>
+            <p>Les matchs collectés apparaîtront ici une fois que la collecte automatique aura commencé.</p>
+            <p style="margin-top: 1rem; font-size: 0.9rem;">
+              <a href="/tasks/collect" style="color: var(--accent);">Lancer une collecte manuelle</a>
+            </p>
+          </div>
+          {% endif %}
+        </section>
+      </main>
+    </div>
+
+    <script>
+      // Rafraîchissement automatique permanent toutes les 5 secondes
+      let refreshInterval;
+      
+      async function refreshData() {
+        try {
+          const response = await fetch(window.location.href);
+          if (response.ok) {
+            const text = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(text, 'text/html');
+            
+            // Mettre à jour le tableau
+            const newTable = doc.querySelector('tbody');
+            const currentTable = document.querySelector('tbody');
+            if (newTable && currentTable) {
+              currentTable.innerHTML = newTable.innerHTML;
+            }
+            
+            // Mettre à jour le compteur
+            const newCount = doc.querySelector('.stat-value');
+            const currentCount = document.querySelector('.stat-value');
+            if (newCount && currentCount) {
+              currentCount.textContent = newCount.textContent;
+            }
+          }
+        } catch (e) {
+          console.error('Erreur lors du rafraîchissement:', e);
+        }
+      }
+      
+      // Démarrer le rafraîchissement automatique
+      refreshInterval = setInterval(refreshData, 5000);
+      
+      // Rafraîchir immédiatement au chargement
+      window.addEventListener('load', () => {
+        refreshData();
+      });
+      
+      // Arrêter le rafraîchissement quand la page n'est plus visible
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          clearInterval(refreshInterval);
+        } else {
+          refreshInterval = setInterval(refreshData, 5000);
+          refreshData(); // Rafraîchir immédiatement quand la page redevient visible
+        }
+      });
+    </script>
+  </body>
+</html>
+
