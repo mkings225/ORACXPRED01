@@ -29,8 +29,8 @@ try:
     except Exception as db_error:
         # PostgreSQL installé mais non accessible
         USE_POSTGRESQL = False
-        from collector import append_matches_to_csv
-        from train_model import train_and_save_model
+from collector import append_matches_to_csv
+from train_model import train_and_save_model
         print(f"[APP] ⚠️ Mode CSV (fallback) - PostgreSQL non accessible: {db_error}")
         print("[APP] ℹ️ Pour activer PostgreSQL, installez et démarrez le serveur PostgreSQL")
         
@@ -136,7 +136,7 @@ scheduler.add_job(
 # Démarrer le scheduler avec gestion d'erreurs
 try:
     if not scheduler.running:
-        scheduler.start()
+scheduler.start()
         print("[SCHEDULER] OK Taches planifiees demarrees avec succes:")
         print("  - Collecte: toutes les 1 minute (permanent, meme sans utilisateurs)")
         print("  - Entrainement: tous les jours a 3h00")
@@ -260,46 +260,46 @@ def ai_predict(
 def fetch_matches() -> List[Dict[str, Any]]:
     """Récupère les matchs depuis l'API 1xBet et prépare les données pour l'UI."""
     try:
-        resp = requests.get(API_URL, timeout=10)
-        resp.raise_for_status()
-        data = resp.json()
-        events = data.get("Value", [])
+    resp = requests.get(API_URL, timeout=10)
+    resp.raise_for_status()
+    data = resp.json()
+    events = data.get("Value", [])
 
-        matches: List[Dict[str, Any]] = []
+    matches: List[Dict[str, Any]] = []
 
-        for ev in events:
-            odds_1, odds_x, odds_2 = extract_1x2_odds(ev)
-            ai = ai_predict(odds_1, odds_x, odds_2)
-            score1, score2, status = extract_score(ev)
+    for ev in events:
+        odds_1, odds_x, odds_2 = extract_1x2_odds(ev)
+        ai = ai_predict(odds_1, odds_x, odds_2)
+        score1, score2, status = extract_score(ev)
 
-            # Générer un ID unique si l'ID de l'événement n'est pas disponible
-            event_id = ev.get("I")
-            if event_id is None:
-                # Utiliser un hash basé sur les équipes et la ligue comme ID de secours
-                match_str = f"{ev.get('L', '')}_{ev.get('O1', '')}_{ev.get('O2', '')}"
-                event_id = int(hashlib.md5(match_str.encode()).hexdigest()[:8], 16)
-            
-            matches.append(
-                {
-                    "id": event_id,
-                    "league": ev.get("L"),
-                    "team1": ev.get("O1"),
-                    "team2": ev.get("O2"),
-                    "odds_1": odds_1,
-                    "odds_x": odds_x,
-                    "odds_2": odds_2,
-                    "prediction": ai["prediction"],
-                    "confidence": ai["confidence"],
-                    "prob_1": ai["probs"].get("1"),
-                    "prob_x": ai["probs"].get("N"),
-                    "prob_2": ai["probs"].get("2"),
-                    "score1": score1,
-                    "score2": score2,
-                    "status": status,
-                }
-            )
+        # Générer un ID unique si l'ID de l'événement n'est pas disponible
+        event_id = ev.get("I")
+        if event_id is None:
+            # Utiliser un hash basé sur les équipes et la ligue comme ID de secours
+            match_str = f"{ev.get('L', '')}_{ev.get('O1', '')}_{ev.get('O2', '')}"
+            event_id = int(hashlib.md5(match_str.encode()).hexdigest()[:8], 16)
+        
+        matches.append(
+            {
+                "id": event_id,
+                "league": ev.get("L"),
+                "team1": ev.get("O1"),
+                "team2": ev.get("O2"),
+                "odds_1": odds_1,
+                "odds_x": odds_x,
+                "odds_2": odds_2,
+                "prediction": ai["prediction"],
+                "confidence": ai["confidence"],
+                "prob_1": ai["probs"].get("1"),
+                "prob_x": ai["probs"].get("N"),
+                "prob_2": ai["probs"].get("2"),
+                "score1": score1,
+                "score2": score2,
+                "status": status,
+            }
+        )
 
-        return matches
+    return matches
     except requests.exceptions.ConnectionError as e:
         print(f"[APP] ❌ Erreur de connexion à l'API 1xBet: {e}")
         return []  # Retourner une liste vide au lieu de planter
@@ -382,9 +382,9 @@ def load_collected_matches() -> List[Dict[str, Any]]:
 def index() -> str:
     """Page principale : liste des matchs."""
     try:
-        matches = fetch_matches()
+    matches = fetch_matches()
         # Si pas de matchs et erreur API, on peut afficher un message
-        return render_template("matches.html", matches=matches)
+    return render_template("matches.html", matches=matches)
     except Exception as e:
         print(f"[APP] ❌ Erreur dans la route index: {e}")
         traceback.print_exc()
@@ -562,6 +562,78 @@ def collect_public():
     try:
         append_matches_to_csv()
         return jsonify({"ok": True, "message": "Collecte effectuée avec succès"})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
+@app.route("/api/collect-debug")
+def api_collect_debug():
+    """
+    Diagnostic de collecte :
+    - Nombre d'événements récupérés
+    - Statuts distincts
+    - Combien détectés comme terminés
+    - Combien ignorés faute de score ou statut live
+    """
+    try:
+        events = fetch_events()
+        total = len(events)
+
+        status_counts: Dict[str, int] = {}
+        finished = 0
+        no_scores = 0
+        live = 0
+        finished_samples: List[Dict[str, Any]] = []
+        ignored_samples: List[Dict[str, Any]] = []
+
+        for ev in events:
+            score1, score2, status = extract_score(ev)
+            status_key = (status or "").lower() or "vide"
+            status_counts[status_key] = status_counts.get(status_key, 0) + 1
+
+            has_scores = score1 is not None and score2 is not None
+            is_finished = is_match_finished(status, score1, score2)
+
+            if is_finished:
+                finished += 1
+                if len(finished_samples) < 5:
+                    finished_samples.append(
+                        {
+                            "teams": f"{ev.get('O1', '')} vs {ev.get('O2', '')}",
+                            "score": f"{score1}-{score2}",
+                            "status": status,
+                            "event_id": ev.get("I"),
+                        }
+                    )
+            else:
+                if not has_scores:
+                    no_scores += 1
+                else:
+                    live += 1
+                if len(ignored_samples) < 5:
+                    ignored_samples.append(
+                        {
+                            "teams": f"{ev.get('O1', '')} vs {ev.get('O2', '')}",
+                            "score": f"{score1}-{score2}",
+                            "status": status,
+                            "event_id": ev.get("I"),
+                        }
+                    )
+
+        return jsonify(
+            {
+                "ok": True,
+                "events_total": total,
+                "finished_detected": finished,
+                "without_scores": no_scores,
+                "live_or_in_progress": live,
+                "status_counts": status_counts,
+                "samples": {
+                    "finished": finished_samples,
+                    "ignored": ignored_samples,
+                },
+            }
+        )
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)}), 500
 
