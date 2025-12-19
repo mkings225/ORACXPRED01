@@ -243,7 +243,7 @@ training_logs (id, model_version_id, metrics, ...)
 - **pytest** avec fixtures
 - **Mocking** des dépendances externes
 
-### 8.2 Tests d'Intégration
+### 8.2 Tests d'Intégration  
 - **Tests API** (pytest + requests)
 - **Tests base de données**
 - **Tests services**

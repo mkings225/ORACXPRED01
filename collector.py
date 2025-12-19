@@ -68,9 +68,9 @@ def extract_score(event: Dict[str, Any]) -> Tuple[Optional[int], Optional[int], 
 def fetch_events() -> List[Dict[str, Any]]:
     """Récupère les événements depuis l'API 1xBet avec gestion d'erreurs améliorée."""
     try:
-        resp = requests.get(API_URL, timeout=10)
-        resp.raise_for_status()
-        data = resp.json()
+    resp = requests.get(API_URL, timeout=10)
+    resp.raise_for_status()
+    data = resp.json()
         events = data.get("Value", [])
         if not events:
             print(f"[COLLECTOR] ATTENTION: Aucun evenement recupere depuis l'API")
@@ -189,27 +189,27 @@ def ensure_csv_header() -> None:
     """S'assure que le fichier CSV existe avec l'en-tête si nécessaire."""
     ensure_data_dir()
     file_exists = os.path.isfile(CSV_PATH)
-    
+
     if not file_exists:
         try:
             with open(CSV_PATH, "w", newline="", encoding="utf-8") as f:
-                writer = csv.writer(f)
-                writer.writerow(
-                    [
-                        "timestamp_utc",
-                        "event_id",
-                        "league",
-                        "team1",
-                        "team2",
-                        "odds_1",
-                        "odds_x",
-                        "odds_2",
-                        "score1",
-                        "score2",
-                        "status",
-                        "outcome",
-                    ]
-                )
+        writer = csv.writer(f)
+            writer.writerow(
+                [
+                    "timestamp_utc",
+                    "event_id",
+                    "league",
+                    "team1",
+                    "team2",
+                    "odds_1",
+                    "odds_x",
+                    "odds_2",
+                    "score1",
+                    "score2",
+                    "status",
+                    "outcome",
+                ]
+            )
             print("[COLLECTOR] ✅ Fichier CSV créé avec l'en-tête")
         except Exception as e:
             print(f"[COLLECTOR] ⚠️ Erreur lors de la création du fichier CSV: {e}")
@@ -247,15 +247,15 @@ def append_matches_to_csv() -> None:
         with open(CSV_PATH, "a", newline="", encoding="utf-8") as f:
             writer = csv.writer(f)
 
-            for ev in events:
+        for ev in events:
                 try:
                     event_id = ev.get("I")
                     team1 = ev.get("O1", "")
                     team2 = ev.get("O2", "")
                     league = ev.get("L", "")
                     
-                    odds_1, odds_x, odds_2 = extract_1x2_odds(ev)
-                    score1, score2, status = extract_score(ev)
+            odds_1, odds_x, odds_2 = extract_1x2_odds(ev)
+            score1, score2, status = extract_score(ev)
                     
                     # Vérifier si le match est terminé
                     is_finished = is_match_finished(status, score1, score2)
@@ -272,24 +272,24 @@ def append_matches_to_csv() -> None:
                         continue
                     
                     # Le match est terminé et n'existe pas encore : on le sauvegarde
-                    outcome = compute_outcome(score1, score2)
+            outcome = compute_outcome(score1, score2)
 
-                    writer.writerow(
-                        [
-                            utc_now,
+            writer.writerow(
+                [
+                    utc_now,
                             event_id,  # identifiant de l'évènement chez 1xBet
                             league,
                             team1,
                             team2,
-                            odds_1,
-                            odds_x,
-                            odds_2,
-                            score1,
-                            score2,
-                            status,
-                            outcome,
-                        ]
-                    )
+                    odds_1,
+                    odds_x,
+                    odds_2,
+                    score1,
+                    score2,
+                    status,
+                    outcome,
+                ]
+            )
                     matches_added += 1
                     print(f"[COLLECTOR] OK Match termine sauvegarde: {team1} vs {team2} ({score1}-{score2})")
                     

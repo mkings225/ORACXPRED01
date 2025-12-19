@@ -29,8 +29,8 @@ try:
     except Exception as db_error:
         # PostgreSQL installé mais non accessible
         USE_POSTGRESQL = False
-from collector import append_matches_to_csv
-from train_model import train_and_save_model
+        from collector import append_matches_to_csv
+        from train_model import train_and_save_model
         print(f"[APP] ⚠️ Mode CSV (fallback) - PostgreSQL non accessible: {db_error}")
         print("[APP] ℹ️ Pour activer PostgreSQL, installez et démarrez le serveur PostgreSQL")
         
@@ -41,6 +41,7 @@ except ImportError as e:
     USE_POSTGRESQL = False
     print(f"[APP] ⚠️ Mode CSV (fallback) - Modules PostgreSQL non disponibles: {e}")
     print("[APP] ℹ️ Installez avec: pip install sqlalchemy psycopg2-binary")
+
 import pandas as pd
 
 app = Flask(__name__)
@@ -136,7 +137,7 @@ scheduler.add_job(
 # Démarrer le scheduler avec gestion d'erreurs
 try:
     if not scheduler.running:
-scheduler.start()
+        scheduler.start()
         print("[SCHEDULER] OK Taches planifiees demarrees avec succes:")
         print("  - Collecte: toutes les 1 minute (permanent, meme sans utilisateurs)")
         print("  - Entrainement: tous les jours a 3h00")
@@ -260,10 +261,10 @@ def ai_predict(
 def fetch_matches() -> List[Dict[str, Any]]:
     """Récupère les matchs depuis l'API 1xBet et prépare les données pour l'UI."""
     try:
-    resp = requests.get(API_URL, timeout=10)
-    resp.raise_for_status()
-    data = resp.json()
-    events = data.get("Value", [])
+        resp = requests.get(API_URL, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+        events = data.get("Value", [])
 
     matches: List[Dict[str, Any]] = []
 
@@ -382,9 +383,9 @@ def load_collected_matches() -> List[Dict[str, Any]]:
 def index() -> str:
     """Page principale : liste des matchs."""
     try:
-    matches = fetch_matches()
+        matches = fetch_matches()
         # Si pas de matchs et erreur API, on peut afficher un message
-    return render_template("matches.html", matches=matches)
+        return render_template("matches.html", matches=matches)
     except Exception as e:
         print(f"[APP] ❌ Erreur dans la route index: {e}")
         traceback.print_exc()
@@ -576,6 +577,12 @@ def api_collect_debug():
     - Combien ignorés faute de score ou statut live
     """
     try:
+        # Importer les fonctions nécessaires depuis le collecteur approprié
+        if USE_POSTGRESQL:
+            from db_collector import fetch_events, is_match_finished
+        else:
+            from collector import fetch_events, is_match_finished
+        
         events = fetch_events()
         total = len(events)
 
